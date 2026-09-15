@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Buster's | Panel de administración</title>
+    <link rel="icon" type="image/png" href="assets/busters-logo.png" />
+
+    <!-- CSS dividido por responsabilidad -->
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/layout.css" />
+    <link rel="stylesheet" href="css/components.css" />
+    <link rel="stylesheet" href="css/pages.css" />
+    <link rel="stylesheet" href="css/responsive.css" />
+    <link rel="stylesheet" href="css/login.css" />
+  </head>
+
+  <body>
+    <section id="loginView" class="login-view" aria-labelledby="loginTitle">
+      <div class="login-card">
+        <aside class="login-brand-panel" aria-label="Buster’s beagle & bagel">
+          <span class="login-brand-tag">BEAGLE &amp; BAGEL</span>
+          <img class="login-logo" src="assets/busters-logo.png" alt="Buster’s, beagle &amp; bagel" width="1248" height="1254" fetchpriority="high" />
+          <div class="login-brand-copy">
+            <h2>Un buen turno<br />empieza aquí.</h2>
+            <p>Tu equipo, tus pedidos y todo el sabor de Buster’s en un solo lugar.</p>
+          </div>
+          <span class="login-brand-footer"><span aria-hidden="true">✦</span> Hecho para nuestro equipo</span>
+        </aside>
+        <div class="login-form-panel">
+          <header class="login-heading">
+            <p class="eyebrow">ACCESO DEL EQUIPO</p>
+            <h1 id="loginTitle">Hola, equipo.</h1>
+            <p>Inicia sesión para comenzar tu turno.</p>
+          </header>
+          <form id="loginForm" class="login-form">
+            <div class="login-field">
+              <label for="loginUsername">Alias de usuario</label>
+              <input id="loginUsername" name="username" required pattern="[a-z0-9_-]{3,32}" maxlength="32" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="Ej. turno_azul" aria-describedby="loginPrivacy" />
+            </div>
+            <div class="login-field">
+              <label for="loginPassword">Contraseña</label>
+              <div class="login-password-wrap">
+                <input id="loginPassword" name="password" type="password" required maxlength="128" autocomplete="current-password" placeholder="Tu contraseña" />
+                <button id="togglePassword" class="password-toggle" type="button" aria-label="Mostrar contraseña" aria-controls="loginPassword" aria-pressed="false">Mostrar</button>
+              </div>
+            </div>
+            <p id="loginError" class="login-error" role="alert"></p>
+            <button type="submit" class="primary-button login-submit"><span>Entrar al panel</span><span aria-hidden="true">→</span></button>
+          </form>
+          <p class="login-help">¿Necesitas acceso? Pídeselo al administrador.</p>
+          <div class="login-privacy" id="loginPrivacy">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 3 4 6v6c0 5 8 9 8 9s8-4 8-9V6l-8-3Z"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg>
+            <p><strong>Tu privacidad va primero.</strong> Usa un alias ficticio, sin nombres reales, correos ni matrículas.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+    <div class="app-shell" id="appShell" hidden>
+      <aside class="sidebar" id="sidebar">
+        <div class="brand">
+          <img class="brand-logo" src="assets/busters-logo.png" alt="Logo de Buster’s" width="64" height="64" />
+          <div>
+            <strong>Buster's</strong>
+            <span>Beagle &amp; bagel</span>
+          </div>
+        </div>
+
+        <nav class="nav" aria-label="Navegación principal">
+          <button class="nav-item active" data-view="inicio">
+            <span class="nav-icon">⌂</span>
+            <span>Inicio</span>
+          </button>
+
+          <button class="nav-item" data-view="pedidos">
+            <span class="nav-icon">▤</span>
+            <span>Pedidos</span>
+            <span class="badge" data-active-orders>0</span>
+          </button>
+
+          <button class="nav-item" data-view="menu">
+            <span class="nav-icon">☕</span>
+            <span>Menú</span>
+          </button>
+
+          <button class="nav-item" data-view="ventas">
+            <span class="nav-icon">↗</span>
+            <span>Ventas</span>
+          </button>
+        </nav>
+
+        <div class="sidebar-bottom">
+          <button class="nav-item" data-view="configuracion">
+            <span class="nav-icon">⚙</span>
+            <span>Configuración</span>
+          </button>
+
+          <button class="ghost-button" id="logoutBtn" type="button">Cerrar sesión</button>
+          <div class="admin-mini">
+            <div class="avatar">AD</div>
+            <div>
+              <strong id="sessionAlias"></strong>
+              <span id="sessionRole"></span>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <main class="main">
+        <div class="panel" role="status" aria-live="polite"><span id="catalogStatus">Cargando catálogo…</span> <button id="retryCatalog" type="button" class="mini-btn" hidden>Reintentar</button></div>
+        <header class="topbar">
+          <div class="topbar-left">
+            <button
+              class="icon-button menu-toggle"
+              id="menuToggle"
+              aria-label="Abrir menú"
+            >
+              ☰
+            </button>
+
+            <img class="topbar-logo" src="assets/busters-logo.png" alt="Buster’s" width="48" height="48" />
+            <div>
+              <p class="eyebrow">Panel del equipo</p>
+              <h1>Buen día, Buster's </h1>
+            </div>
+          </div>
+
+          <div class="topbar-actions">
+            <div class="search-box">
+              <span>⌕</span>
+              <input
+                id="globalSearch"
+                type="search"
+                placeholder="Buscar producto…"
+              />
+            </div>
+
+
+            <button class="primary-button" id="newProductBtn">
+              + Nuevo producto
+            </button>
+          </div>
+        </header>
+
+        <!-- =====================================================
+             VISTA: INICIO
+             ===================================================== -->
+        <section class="content active-view" id="view-inicio">
+          <p class="muted">Pedidos recibidos desde la app.</p>
+          <div class="stats-grid">
+ <article class="stat-card"><div class="stat-icon">▤</div><div><span>Pedidos activos</span><strong data-active-orders>0</strong><small>Pendientes de entrega</small></div></article>
+ <article class="stat-card"><div class="stat-icon">☕</div><div><span>En preparación</span><strong id="preparingCount">0</strong><small>En cocina</small></div></article>
+ <article class="stat-card"><div class="stat-icon">✓</div><div><span>Entregados recientes</span><strong id="deliveredCount">0</strong><small>De los últimos 50 pedidos</small></div></article>
+ </div><div class="dashboard-grid">
+            <section class="panel orders-panel">
+              <div class="panel-heading">
+                <div>
+                  <span class="section-label">Operación en tiempo real</span>
+                  <h2>Pedidos recientes</h2>
+                </div>
+                <button class="ghost-button" data-go="pedidos">Ver todos →</button>
+              </div>
+
+              <div class="orders-table-wrap">
+                <table class="orders-table">
+                  <thead>
+                    <tr>
+                      <th>Pedido</th>
+                      <th>Hora</th>
+                      <th>Total</th>
+                      <th>Estado</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody id="recentOrders"><tr><td colspan="5">Cargando pedidos…</td></tr></tbody>
+                </table>
+              </div>
+            </section>
+
+            <aside class="panel quick-panel">
+              <div class="panel-heading">
+                <div>
+                  <span class="section-label">Accesos rápidos</span>
+                  <h2>Control del turno</h2>
+                </div>
+              </div>
+
+              <button class="quick-action" data-go="pedidos">
+                <span class="quick-icon">▤</span>
+                <span>
+                  <strong>Gestionar pedidos</strong>
+                  <small><span data-active-orders>0</span> pedidos activos</small>
+                </span>
+                <span>→</span>
+              </button>
+
+              <button class="quick-action" data-go="menu">
+                <span class="quick-icon">☕</span>
+                <span>
+                  <strong>Administrar menú</strong>
+                  <small><span id="productCount">Cargando productos…</span></small>
+                </span>
+                <span>→</span>
+              </button>
+            </aside>
+          </div>
+
+          <section class="panel products-panel">
+            <div class="panel-heading products-heading">
+              <div>
+                <span class="section-label">Vista rápida</span>
+                <h2>Productos destacados</h2>
+              </div>
+
+              <div class="category-tabs" id="categoryTabs">
+                <button class="tab active" data-category="todos">Todos</button>
+                <button class="tab" data-category="platillo">Platillos</button>
+                <button class="tab" data-category="bebida">Bebidas</button>
+                <button class="tab" data-category="snack">Snacks</button>
+              </div>
+            </div>
+
+            <div class="product-grid" id="productGrid"></div>
+          </section>
+        </section>
+
+        <!-- =====================================================
+             VISTA: PEDIDOS
+             ===================================================== -->
+        <section class="content" id="view-pedidos">
+          <div class="page-title-row">
+            <div>
+              <p class="eyebrow">Operación</p>
+              <h2>Pedidos</h2>
+              <p class="muted">
+                Administra el flujo de pedidos desde que llegan hasta su entrega.
+              </p>
+            </div>
+          </div>
+
+          <p class="orders-help">
+            Usa los botones para avanzar cada pedido. Las cancelaciones y entregas quedan guardadas en el historial.
+          </p>
+
+          <p id="ordersStatus" role="status">Cargando pedidos…</p><button id="refreshOrders" type="button" class="mini-btn">Actualizar pedidos</button><div class="kanban" id="ordersBoard"></div>
+        </section>
+
+        <!-- =====================================================
+             VISTA: MENÚ
+             ===================================================== -->
+        <section class="content" id="view-menu">
+          <div class="page-title-row">
+            <div>
+              <p class="eyebrow">Catálogo</p>
+              <h2>Administrar menú</h2>
+              <p class="muted">
+                Consulta precios, disponibilidad y categoría de cada producto.
+              </p>
+            </div>
+          </div>
+
+          <div class="menu-toolbar">
+            <div class="search-box wide">
+              <span>⌕</span>
+              <input
+                id="menuSearch"
+                type="search"
+                placeholder="Buscar en el menú..."
+              />
+            </div>
+
+            <select id="menuFilter">
+              <option value="todos">Todas las categorías</option>
+              <option value="platillo">Platillos</option>
+              <option value="bebida">Bebidas</option>
+              <option value="snack">Snacks</option>
+            </select>
+          </div>
+
+          <div class="product-grid admin-product-grid" id="menuProductGrid"></div>
+        </section>
+
+        <!-- =====================================================
+             VISTA: VENTAS
+             ===================================================== -->
+        <section class="content" id="view-ventas">
+          <div class="page-title-row">
+            <div>
+              <p class="eyebrow">Rendimiento</p>
+              <h2>Ventas</h2>
+              <p class="muted">Resumen visual del desempeño de la cafetería.</p>
+            </div>
+          </div>
+
+          <p class="muted">Ventas: datos de demostración; todavía no representan cobros registrados.</p>
+          <div class="stats-grid">
+            <article class="stat-card">
+              <div class="stat-icon">$</div>
+              <div>
+                <span>Esta semana</span>
+                <strong>$42,680</strong>
+                <small class="positive">↑ 8.6%</small>
+              </div>
+            </article>
+
+            <article class="stat-card">
+              <div class="stat-icon">#</div>
+              <div>
+                <span>Pedidos</span>
+                <strong>496</strong>
+                <small>Promedio 99/día</small>
+              </div>
+            </article>
+
+            <article class="stat-card">
+              <div class="stat-icon">★</div>
+              <div>
+                <span>Más vendido</span>
+                <strong>Hotdog</strong>
+                <small>128 unidades</small>
+              </div>
+            </article>
+          </div>
+
+          <div class="panel chart-card">
+            <div class="panel-heading">
+              <div>
+                <span class="section-label">Últimos 7 días</span>
+                <h2>Comportamiento de ventas</h2>
+              </div>
+            </div>
+
+            <div class="chart" aria-label="Gráfica simulada">
+              <div class="bar" style="height: 45%"><span>Lun</span></div>
+              <div class="bar" style="height: 62%"><span>Mar</span></div>
+              <div class="bar" style="height: 50%"><span>Mié</span></div>
+              <div class="bar" style="height: 74%"><span>Jue</span></div>
+              <div class="bar" style="height: 66%"><span>Vie</span></div>
+              <div class="bar" style="height: 90%"><span>Sáb</span></div>
+              <div class="bar" style="height: 58%"><span>Dom</span></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- =====================================================
+             VISTA: CONFIGURACIÓN
+             ===================================================== -->
+        <section class="content" id="view-configuracion">
+          <div class="page-title-row"><div><p class="eyebrow">Administración</p><h2>Cuentas de acceso</h2><p class="muted">Solo alias ficticios y contraseñas exclusivas para este proyecto. No uses datos de personas reales.</p></div></div>
+          <div class="panel modal account-panel">
+            <form id="accountForm">
+              <label>Alias ficticio<input name="username" required pattern="[a-z0-9_-]{3,32}" maxlength="32" autocomplete="off" placeholder="Ej. turno_verde" /></label>
+              <label>Contraseña<input name="password" type="password" required minlength="15" maxlength="128" autocomplete="new-password" /></label>
+              <label>Permisos<select name="role"><option value="employee">Empleado</option><option value="admin">Administrador</option></select></label>
+              <button type="submit" class="primary-button">Crear cuenta</button>
+            </form>
+            <p id="accountMessage" role="status"></p>
+          </div>
+          <div class="panel" id="accountList"></div>
+ <div class="panel"><h2>Opciones y complementos</h2><p class="muted">Define sabores, preparaciones y precios adicionales. Después asígnalos a cada producto desde el menú.</p><div id="modifierList"></div><button id="newModifier" type="button" class="mini-btn">+ Nuevo grupo</button></div>
+ <div class="panel modal account-panel"><h3 id="modifierFormTitle">Nuevo grupo de opciones</h3><form id="modifierForm">
+ <label>Nombre del grupo<input name="name" required maxlength="80" placeholder="Ej. Tipo de leche" /></label>
+ <div class="form-row"><label>Mínimo de opciones<input name="min_selections" type="number" min="0" max="12" value="0" required /></label><label>Máximo de opciones<input name="max_selections" type="number" min="1" max="12" value="1" required /></label></div>
+ <p class="muted">Mínimo 0 significa opcional. Desactiva las opciones que ya no se ofrezcan.</p><div id="modifierOptions"></div><button id="addModifierOption" class="mini-btn" type="button">+ Agregar opción</button><button type="submit" class="primary-button">Guardar grupo</button></form><p id="modifierMessage" role="status"></p></div>
+        </section>
+      </main>
+    </div>
+
+    <!-- =========================================================
+         MODAL: NUEVO PRODUCTO
+         ========================================================= -->
+    <div class="modal-backdrop" id="productModal" aria-hidden="true">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <div class="modal-header">
+          <div>
+            <p class="eyebrow">Catálogo</p>
+            <h2 id="modalTitle">Nuevo producto</h2>
+          </div>
+          <button class="icon-button" id="closeModal" aria-label="Cerrar">×</button>
+        </div>
+
+        <form id="productForm">
+          <label>
+            Nombre del producto
+            <input name="name" required placeholder="Ej. Latte vainilla" />
+          </label>
+
+          <div class="form-row">
+            <label>
+              Precio
+              <input name="price" required type="number" min="0" max="99999999.99" step="0.01" placeholder="70" />
+            </label>
+
+            <label>
+              Categoría
+              <select name="category">
+                <option value="platillo">Platillo</option>
+                <option value="bebida">Bebida</option>
+                <option value="snack">Snack</option>
+              </select>
+            </label>
+          </div>
+
+          <label>
+            Descripción
+            <textarea
+              name="description" required
+              placeholder="Descripción breve del producto"
+            ></textarea>
+          </label>
+
+          <fieldset class="variant-editor">
+            <legend>Presentaciones y precios</legend>
+            <label class="variant-switch"><input id="useVariants" type="checkbox" /> Este producto tiene tamaños o presentaciones</label>
+            <div id="variantFields" hidden>
+              <p class="muted">Un precio por tamaño. M: 350 ml; G: 470 ml; +G: 590 ml. En otras presentaciones, deja el volumen vacío si no está confirmado.</p>
+              <div id="variantRows"></div>
+              <button id="addVariant" class="mini-btn" type="button">+ Agregar tamaño</button>
+            </div>
+          </fieldset>
+          <fieldset class="variant-editor"><legend>Opciones del producto</legend><div id="productModifiers"></div></fieldset>
+          <label>Imagen (ruta local o URL HTTPS autorizada)<input name="image" required placeholder="assets/galleta.jpg" /></label>
+          <p id="productFormError" role="alert"></p>
+          <div class="modal-actions">
+            <button type="button" class="ghost-button" id="cancelModal">
+              Cancelar
+            </button>
+            <button type="submit" class="primary-button">Guardar producto</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- JavaScript dividido por responsabilidad. El orden importa. -->
+    <script src="js/core/state.js"></script>
+    <script src="js/core/dom.js"></script>
+    <script src="js/core/api.js"></script>
+    <script src="js/core/auth.js"></script>
+    <script src="js/features/navigation.js"></script>
+    <script src="js/features/products.js"></script>
+    <script src="js/features/orders.js"></script>
+    <script src="js/features/product-modal.js"></script>
+    <script src="js/features/modifiers.js"></script>
+    <script src="js/app.js"></script>
+  </body>
+</html>

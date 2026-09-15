@@ -1,0 +1,1 @@
+window.BustersAdmin.auth.initialize();

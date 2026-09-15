@@ -1,0 +1,146 @@
+/* =========================================================
+   RESPONSIVE
+   Adaptaciones para tablet y móvil
+   ========================================================= */
+/* Responsive */
+@media (max-width: 1180px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .product-grid,
+  .admin-product-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .search-box {
+    min-width: 220px;
+  }
+
+  .kanban {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 880px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    position: fixed;
+    left: -280px;
+    width: 260px;
+    transition: 0.25s;
+  }
+
+  .sidebar.open {
+    left: 0;
+    box-shadow: 20px 0 60px rgba(0, 0, 0, 0.25);
+  }
+
+  .main {
+    padding: 0 18px 30px;
+  }
+
+  .menu-toggle {
+    display: block;
+  }
+
+  .topbar {
+    height: auto;
+    min-height: 92px;
+    padding: 14px 0;
+    align-items: flex-start;
+  }
+
+  .topbar-actions {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .topbar .search-box {
+    display: none;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .product-grid,
+  .admin-product-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .topbar h1 {
+    font-size: 18px;
+  }
+
+  .topbar .primary-button {
+    display: none;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .products-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .category-tabs {
+    width: 100%;
+    overflow: auto;
+  }
+
+  .product-grid,
+  .admin-product-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .product-image {
+    height: 120px;
+  }
+
+  .page-title-row {
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .page-title-row h2 {
+    font-size: 23px;
+  }
+
+  .kanban {
+    grid-template-columns: 1fr;
+  }
+
+  .menu-toolbar {
+    flex-direction: column;
+  }
+
+  .search-box.wide {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .menu-toolbar select {
+    height: 44px;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .chart {
+    gap: 8px;
+  }
+
+  .orders-table {
+    min-width: 620px;
+  }
+}
+

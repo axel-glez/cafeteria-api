@@ -1,0 +1,121 @@
+/* Acceso del equipo e identidad de Buster’s. */
+.login-view {
+  min-height: 100vh;
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  padding: 40px 24px;
+  background: radial-gradient(ellipse at 12% 15%, #ffe6bc80, transparent 48%), radial-gradient(ellipse at 95% 95%, #edddc780, transparent 45%), #f7f4ee;
+}
+.login-card {
+  width: min(100%, 1000px);
+  display: grid;
+  grid-template-columns: 0.95fr 1.05fr;
+  overflow: hidden;
+  border: 1px solid #e6ded1;
+  border-radius: 30px;
+  background: #fffdfa;
+  box-shadow: 0 24px 70px #49301412;
+}
+.login-brand-panel {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 38px 40px;
+  color: #3f291c;
+  background: #f4ce91;
+  text-align: center;
+}
+.login-brand-panel::before, .login-brand-panel::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  width: 420px;
+  height: 420px;
+  border: 1px solid #a2672926;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.login-brand-panel::before { top: -235px; left: -180px; box-shadow: 0 0 0 32px #fff6e51c; }
+.login-brand-panel::after { bottom: -270px; right: -190px; box-shadow: 0 0 0 35px #fff6e526; }
+.login-brand-tag { font-size: 10px; font-weight: 800; letter-spacing: 0.23em; }
+.login-logo { display: block; width: 230px; height: auto; margin: 28px 0 24px; filter: drop-shadow(0 12px 12px #7b471724); }
+.login-brand-copy h2 { margin: 0; font-size: 32px; line-height: 1.15; letter-spacing: -0.035em; font-weight: 800; }
+.login-brand-copy p { max-width: 285px; margin: 16px auto 0; color: #66482f; font-size: 14px; line-height: 1.65; }
+.login-brand-footer { display: flex; gap: 9px; align-items: center; margin-top: 34px; font-size: 11px; color: #66482f; }
+.login-brand-footer span { font-size: 18px; }
+.login-form-panel { min-width: 0; padding: 56px 52px 40px; }
+.login-heading .eyebrow { margin: 0 0 13px; color: #98601d; font-size: 10px; letter-spacing: 0.14em; }
+.login-heading h1 { margin: 0; font-size: 36px; font-weight: 800; line-height: 1.2; letter-spacing: -0.04em; color: #30261e; }
+.login-heading > p:last-child { margin: 12px 0 30px; color: #71695f; font-size: 14px; line-height: 1.6; }
+.login-form { display: grid; gap: 20px; }
+.login-field { display: grid; gap: 9px; min-width: 0; }
+.login-field label { color: #473a2d; font-size: 12px; font-weight: 700; }
+.login-field input {
+  width: 100%; min-width: 0; height: 52px; border: 1px solid #dcd5cb;
+  border-radius: 12px; padding: 0 15px; background: #fff; color: #30261e;
+  font-size: 14px; outline: none; transition: border-color .15s, box-shadow .15s;
+}
+.login-field input::placeholder { color: #827a70; }
+.login-field input:focus { border-color: #c1802b; box-shadow: 0 0 0 3px #f5c77c40; }
+.login-password-wrap { position: relative; min-width: 0; }
+.login-password-wrap input { padding-right: 88px; }
+.password-toggle {
+  position: absolute; right: 6px; top: 6px; height: 40px; min-width: 73px;
+  padding: 0 10px; border: 0; border-radius: 8px; color: #77501e; background: transparent;
+  font-size: 11px; font-weight: 700; display: inline-flex; justify-content: center; align-items: center;
+}
+.password-toggle:hover { background: #fff3df; }
+.login-submit.primary-button {
+  width: 100%; min-height: 52px; border: 1px solid #eda730; border-radius: 12px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 12px 18px; background: #ffb338; color: #382711; font-size: 14px; font-weight: 800;
+  box-shadow: 0 5px 12px #c8881720;
+}
+.login-submit.primary-button:hover { background: #f5a721; }
+.login-submit span:last-child { font-size: 22px; font-weight: 400; line-height: 1; }
+.login-submit:focus-visible, .password-toggle:focus-visible { outline: 3px solid #925d20; outline-offset: 3px; }
+.login-error { margin: 0; padding: 12px 14px; border: 1px solid #f1d3cd; border-radius: 10px; background: #fff0ec; font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
+.login-error:empty { display: none; }
+.login-help { margin: 18px 0 28px; color: #71695f; font-size: 11px; text-align: center; line-height: 1.6; }
+.login-privacy { display: flex; align-items: flex-start; gap: 10px; border-top: 1px solid #ebe4da; padding-top: 22px; }
+.login-privacy svg { flex: 0 0 19px; width: 19px; height: 19px; margin-top: 2px; color: #917144; }
+.login-privacy p { margin: 0; color: #756c61; font-size: 11px; line-height: 1.65; }
+.login-privacy strong { display: block; color: #544534; font-weight: 600; }
+.brand-logo { display: block; width: 64px; height: 64px; object-fit: contain; flex: 0 0 64px; }
+.brand { padding-left: 0; padding-right: 0; gap: 10px; }
+.topbar-logo { display: none; flex: 0 0 48px; object-fit: contain; }
+#logoutBtn { width: 100%; min-height: 44px; text-align: left; margin-top: 8px; padding: 12px 13px; color: #ddd4c8; }
+#logoutBtn:hover { color: #fff; background: #ffffff12; }
+@media (max-width: 880px) {
+  .topbar-logo { display: block; }
+  .login-form-panel { padding: 40px 30px; }
+  .login-brand-panel { padding: 32px 24px; }
+  .login-logo { width: 200px; }
+  .login-brand-copy h2 { font-size: 28px; }
+}
+@media (max-width: 680px) {
+  .login-view { padding: 24px 16px; }
+  .login-card { max-width: 460px; grid-template-columns: 1fr; border-radius: 24px; }
+  .login-brand-panel { padding: 22px; flex-direction: row; gap: 18px; justify-content: flex-start; text-align: left; }
+  .login-brand-tag, .login-brand-footer, .login-brand-copy p { display: none; }
+  .login-logo { width: 90px; margin: 0; flex-shrink: 0; }
+  .login-brand-copy h2 { font-size: 23px; }
+  .login-form-panel { padding: 30px 26px; }
+  .login-heading h1 { font-size: 30px; }
+  .login-heading > p:last-child { margin-bottom: 24px; }
+  .login-help { margin-bottom: 22px; }
+  .login-privacy { padding-top: 18px; }
+}
+@media (max-width: 380px) {
+  .login-form-panel { padding: 28px 20px; }
+  .login-brand-panel { padding: 20px; gap: 12px; }
+  .login-logo { width: 76px; }
+  .login-brand-copy h2 { font-size: 21px; }
+  .topbar-left { gap: 8px; }
+  .topbar-logo { width: 38px; height: 38px; flex-basis: 38px; }
+}

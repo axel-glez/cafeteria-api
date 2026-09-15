@@ -12,7 +12,7 @@ services:
       - key: NODE_ENV
         value: production
       - key: SERVE_FRONTEND
-        value: "false"
+        value: "true"
       - key: DATABASE_URL
         sync: false
       - key: MOBILE_ORIGINS

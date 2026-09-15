@@ -11,7 +11,7 @@ import { ZodError } from "zod";
 import { productsRouter } from "./routes/products";
 import { categoriesRouter } from "./routes/categories";
 
-const frontendDir = process.env.FRONTEND_DIR || path.resolve(process.cwd(), '../../cafeadmin/cafeteria-admin');
+const frontendDir = process.env.FRONTEND_DIR || path.resolve(process.cwd(), process.env.NODE_ENV === 'production' ? 'public' : '../../cafeadmin/cafeteria-admin');
 const serveFrontend = process.env.SERVE_FRONTEND !== 'false';
 const imageOrigins: string[] = serveFrontend ? JSON.parse(readFileSync(path.join(frontendDir, 'assets/image-origins.json'), 'utf8')) : [];
 for (const origin of imageOrigins) {
@@ -33,7 +33,7 @@ app.get('/health', (_req, res) => { res.json({ status: 'ok' }); });
 app.use((req, res, next) => {
   if (['GET', 'HEAD', 'OPTIONS'].includes(req.method)) { next(); return; }
   const origin = req.get('origin');
-  const allowed = process.env.APP_ORIGIN || `http://localhost:${process.env.PORT || 5000}`;
+  const allowed = process.env.APP_ORIGIN || process.env.RENDER_EXTERNAL_URL || `http://localhost:${process.env.PORT || 5000}`;
   if ((origin && origin !== allowed && !res.locals.mobileOriginAllowed) || req.get('X-Cafe-Request') !== '1' || req.get('content-type')?.split(';')[0].trim().toLowerCase() !== 'application/json' || (req.get('sec-fetch-site') === 'cross-site' && !res.locals.mobileOriginAllowed)) {
     res.status(403).json({ error: 'Solicitud no autorizada' }); return;
   }
