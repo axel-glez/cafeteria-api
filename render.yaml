@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: cafeteria-api
+    runtime: node
+    plan: free
+    buildCommand: npm ci --include=dev --ignore-scripts && npx prisma generate --schema prisma/schema.prisma && npm run build
+    startCommand: npm run start:render
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: 24.13.0
+      - key: NODE_ENV
+        value: production
+      - key: SERVE_FRONTEND
+        value: "false"
+      - key: DATABASE_URL
+        sync: false
+      - key: MOBILE_ORIGINS
+        sync: false
