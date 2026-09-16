@@ -5,6 +5,8 @@ import type { PoolClient } from 'pg';
 import { accessDb, tokenHash } from '../lib/access';
 import { prisma } from '../lib/prisma';
 import { ApiError,catalogInclude,serializeProduct } from '../lib/catalog';
+import { drainPushJobs } from '../lib/push';
+import { pushTokenPattern } from '../lib/push-message';
 export const mobileRouter=Router();
 export const ordersRouter=Router();
 const uuid=z.uuid();
@@ -34,6 +36,15 @@ mobileRouter.post('/sesiones',async(req,res)=>{
  res.status(201).json({token,expires_at:result.rows[0].expires_at});
 });
 const orderColumns='id,folio::text,status,currency,total::text,created_at,updated_at';
+mobileRouter.post('/notificaciones',requireCustomer,async(req,res)=>{
+ const {token,enabled}=z.strictObject({token:z.string().regex(pushTokenPattern),enabled:z.boolean().default(true)}).parse(req.body);
+ await limit('mobile:push:'+res.locals.customerHash,20);
+ if(enabled){
+  await accessDb.query(`INSERT INTO public.order_push_devices(token,session_hash) VALUES($1,$2)
+    ON CONFLICT(token) DO UPDATE SET session_hash=excluded.session_hash,updated_at=now()`,[token,res.locals.customerHash]);
+ }else await accessDb.query('DELETE FROM public.order_push_devices WHERE token=$1 AND session_hash=$2',[token,res.locals.customerHash]);
+ res.json({ok:true});
+});
 async function readOrders(c:PoolClient,ids:string[]){
  if(!ids.length)return [];
  const orders=(await c.query(`SELECT ${orderColumns} FROM public.orders WHERE id=ANY($1::uuid[]) ORDER BY created_at DESC,id DESC`,[ids])).rows;
@@ -116,7 +127,13 @@ ordersRouter.patch('/:id/estado',async(req,res)=>{
   if(!next[current.status]!.includes(data.status))throw new ApiError(409,'Ese cambio de estado no está permitido');
   await c.query('UPDATE public.orders SET status=$1,updated_at=now() WHERE id=$2',[data.status,id]);
   await c.query('INSERT INTO public.order_status_history(order_id,from_status,to_status,actor_account_id) VALUES($1,$2,$3,$4)',[id,current.status,data.status,res.locals.account.id]);
+  await c.query(`INSERT INTO public.order_push_jobs(order_id,session_hash,token,status,folio)
+    SELECT o.id,o.session_hash,d.token,o.status,'B-'||o.folio::text FROM public.orders o
+    JOIN public.order_push_devices d ON d.session_hash=o.session_hash
+    JOIN public.order_sessions s ON s.token_hash=o.session_hash AND s.expires_at>now()
+    WHERE o.id=$1 ON CONFLICT DO NOTHING`,[id]);
   return readOrder(c,id);
  }));
+ void drainPushJobs();
 });
 
