@@ -7,6 +7,7 @@ import { prisma } from '../lib/prisma';
 import { ApiError,catalogInclude,serializeProduct } from '../lib/catalog';
 import { drainPushJobs } from '../lib/push';
 import { pushTokenPattern } from '../lib/push-message';
+import { readCafeStatus, requireCafeOpen } from '../lib/cafe-status';
 export const mobileRouter=Router();
 export const ordersRouter=Router();
 const uuid=z.uuid();
@@ -25,9 +26,11 @@ const requireCustomer:RequestHandler=async(req,res,next)=>{
  if(!(await accessDb.query('SELECT 1 FROM public.order_sessions WHERE token_hash=$1 AND expires_at>now()',[hash])).rowCount)throw new ApiError(401,'La sesión de compra terminó');
  res.locals.customerHash=hash;next();
 };
+mobileRouter.get('/cafeteria',async(_req,res)=>{res.json(await readCafeStatus());});
 mobileRouter.get('/catalogo',async(_req,res)=>{
+ const cafeteria=await readCafeStatus();
  const rows=await prisma.products.findMany({where:{archived:false,available:true,variants:{some:{archived:false,available:true}}},include:{...catalogInclude,variants:{...catalogInclude.variants,where:{archived:false,available:true}}},orderBy:[{name:'asc'},{id:'asc'}]});
- res.json({currency:'MXN',products:rows.map(p=>{const data=serializeProduct(p);return {...data,modifier_groups:data.modifier_groups.map(g=>({...g,options:g.options.filter(o=>o.available)}))};})});
+ res.json({currency:'MXN',cafeteria,products:rows.map(p=>{const data=serializeProduct(p);return {...data,modifier_groups:data.modifier_groups.map(g=>({...g,options:g.options.filter(o=>o.available)}))};})});
 });
 mobileRouter.post('/sesiones',async(req,res)=>{
  z.strictObject({}).parse(req.body);await limit('mobile:sessions:global',60);
@@ -66,6 +69,7 @@ mobileRouter.post('/pedidos',requireCustomer,async(req,res)=>{
   await c.query('SELECT token_hash FROM public.order_sessions WHERE token_hash=$1 FOR UPDATE',[res.locals.customerHash]);
   const previous=(await c.query('SELECT id,request_hash FROM public.orders WHERE session_hash=$1 AND idempotency_key=$2',[res.locals.customerHash,key])).rows[0];
   if(previous){if(previous.request_hash!==requestHash)throw new ApiError(409,'Esa clave ya se usó con otro pedido');return {replayed:true,order:await readOrder(c,previous.id)};}
+  await requireCafeOpen(c);
   const ids=[...new Set(body.items.map(i=>i.variant_id))].sort();
   const variants=(await c.query(`SELECT v.id,v.product_id,(v.price*100)::bigint::text cents,p.name,s.label,s.volume_ml
    FROM public.product_variants v JOIN public.products p ON p.id=v.product_id JOIN public.presentations s ON s.id=v.presentation_id

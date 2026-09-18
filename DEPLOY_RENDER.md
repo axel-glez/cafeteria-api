@@ -16,6 +16,10 @@
 
 El arranque usa tsx sin modo watch para resolver los imports TypeScript actuales. El build comprueba tipos. La generación de Prisma no ejecuta migraciones ni cambia la base de datos. Se usa la base existente, que debe tener ya las tablas del catálogo y pedidos.
 
+Para la función de apertura/cierre, ejecutar `npm run cafe:migrate` contra la base
+del entorno **antes de desplegar el nuevo backend**. Después actualizar la app.
+El procedimiento y los contratos están en [docs/APERTURA-CIERRE.md](docs/APERTURA-CIERRE.md).
+
 ## Para los compañeros
 
 Sustituye localhost o la IP local por la URL HTTPS asignada por Render, conservando el prefijo /api/v1 donde corresponda. Ejemplo ilustrativo: https://NOMBRE-REAL.onrender.com/api/v1/catalogo.

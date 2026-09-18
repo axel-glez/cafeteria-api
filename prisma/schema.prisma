@@ -6,6 +6,12 @@ datasource db {
   provider = "postgresql"
 }
 // Restricciones adicionales, índices parciales y RLS: prisma/sql/005_normalized_catalog_orders.sql.
+// Singleton, CHECK(id=1) y RLS: prisma/sql/007_cafe_status.sql.
+model cafe_settings {
+ id Int @id @default(1)
+ is_open Boolean @default(true)
+ updated_at DateTime @default(dbgenerated("clock_timestamp()")) @db.Timestamptz(6)
+}
 model products {
  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
  name String

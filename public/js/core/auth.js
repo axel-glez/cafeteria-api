@@ -6,6 +6,7 @@
   function signedOut() {
     user = null;
     App.orders?.stop();
+    App.cafeStatus?.stop();
     resetPasswordVisibility();
     byId('appShell').hidden = true;
     byId('loginView').hidden = false;
@@ -32,12 +33,14 @@
       App.navigation.initialize();
       App.products.initialize();
       App.orders.initialize();
+      App.cafeStatus.initialize();
       App.productModal.initialize();
       App.modifiers.initialize();
       initialized = true;
     } else await App.products.loadCatalog();
     App.navigation.showView(isAdmin() ? 'inicio' : 'pedidos');
     App.orders.start();
+    App.cafeStatus.start();
     if (isAdmin()) { await loadAccounts(); try { await App.modifiers.load(); } catch(error) { byId('modifierMessage').textContent = error.message; } }
   }
   async function loadAccounts() {

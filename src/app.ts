@@ -10,6 +10,7 @@ import { Prisma } from "./generated/prisma/client";
 import { ZodError } from "zod";
 import { productsRouter } from "./routes/products";
 import { categoriesRouter } from "./routes/categories";
+import { cafeStatusRouter } from "./routes/cafe-status";
 
 const frontendDir = process.env.FRONTEND_DIR || path.resolve(process.cwd(), process.env.NODE_ENV === 'production' ? 'public' : '../../cafeadmin/cafeteria-admin');
 const serveFrontend = process.env.SERVE_FRONTEND !== 'false';
@@ -44,6 +45,7 @@ app.use('/auth', authRouter);
 
 app.use("/api/v1", mobileRouter);
 app.use("/pedidos", requireSession, ordersRouter);
+app.use("/cafeteria", requireSession, cafeStatusRouter);
 app.use("/modificadores", requireSession, modifiersRouter);
 app.use("/productos", requireSession, productPermission, productsRouter);
 app.use(["/categorias", "/categories"], requireSession, (req, res, next) => {

@@ -1,0 +1,8 @@
+.cafe-control { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 18px; padding: 16px 20px; }
+.cafe-control-copy { flex: 1; min-width: 220px; }
+.cafe-control-copy p { margin: 6px 0 0; font-size: 14px; line-height: 1.5; }
+.cafe-control-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+#cafeStatusLabel { display: inline-block; padding: 5px 10px; border-radius: 20px; background: #f1eee9; color: #554c43; }
+#cafeStatusLabel[data-state="open"] { background: #e7f2e3; color: #315827; }
+#cafeStatusLabel[data-state="closed"] { background: #fff0e5; color: #8b4c08; }
+.cafe-control button:disabled { opacity: .55; cursor: wait; }
