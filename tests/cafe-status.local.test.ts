@@ -13,7 +13,7 @@ process.env.DIRECT_URL = process.env.DATABASE_URL;
 process.env.SERVE_FRONTEND = 'false';
 process.env.NODE_ENV = 'test';
 
-test('Apertura/cierre: rutas reales y SQL en PostgreSQL en memoria', { timeout: 60000 }, async t => {
+test('Pedidos: apertura/cierre e indicaciones con rutas reales y SQL en memoria', { timeout: 60000 }, async t => {
   const db = await PGlite.create();
   t.after(() => db.close());
   const migration = readFileSync(new URL('../prisma/sql/007_cafe_status.sql', import.meta.url), 'utf8');
@@ -24,6 +24,10 @@ test('Apertura/cierre: rutas reales y SQL en PostgreSQL en memoria', { timeout: 
   await db.exec('CREATE ROLE anon; CREATE ROLE authenticated;');
   await db.exec(readFileSync(new URL('../prisma/sql/006_push_notifications.sql', import.meta.url), 'utf8'));
   await db.exec(migration);
+  const notesMigration = readFileSync(new URL('../prisma/sql/008_order_notes.sql', import.meta.url), 'utf8');
+  // Simular el esquema anterior únicamente en esta base temporal vacía.
+  await db.exec('ALTER TABLE public.orders DROP COLUMN notes');
+  await db.exec(notesMigration);
 
   const { accessDb, tokenHash } = await import('../src/lib/access');
   const { prisma } = await import('../src/lib/prisma');
@@ -109,6 +113,8 @@ test('Apertura/cierre: rutas reales y SQL en PostgreSQL en memoria', { timeout: 
       const order = await json('POST', '/api/v1/pedidos', draft, 201, customer);
       orderId = order.id;
       assert.equal(order.total, '35.00');
+      assert.equal(order.notes, '');
+      assert.equal((await db.query<{ request_hash: string }>('SELECT request_hash FROM orders WHERE id=$1', [order.id])).rows[0].request_hash, tokenHash(JSON.stringify(draft)));
       await setOpen(false);
       const replay = await json('POST', '/api/v1/pedidos', draft, 200, customer);
       assert.equal(replay.id, order.id);
@@ -130,11 +136,38 @@ test('Apertura/cierre: rutas reales y SQL en PostgreSQL en memoria', { timeout: 
       assert.equal(conflict.code, 'CAFE_STATE_CHANGED');
       assert.equal((await json('GET', '/api/v1/cafeteria')).is_open, true);
     });
+    await t.test('indicaciones opcionales, validación, reintentos e historial', async () => {
+      const notesSession = await json('POST', '/api/v1/sesiones', {}, 201);
+      const buyer = { ...headers, Authorization: `Bearer ${notesSession.token}`, 'Idempotency-Key': randomUUID() };
+      for (const notes of [null, 7, {}, 'x'.repeat(501), 'sin\u0000mostaza']) {
+        await json('POST', '/api/v1/pedidos', { ...draft, notes }, 400, buyer);
+      }
+      const notes = 'Hot dog sin mostaza.\nHamburguesa sin cebolla <script>alert(1)</script>';
+      const submitted = await json('POST', '/api/v1/pedidos', { ...draft, notes: '  ' + notes + '  ' }, 201, buyer);
+      assert.equal(submitted.notes, notes);
+      assert.equal((await json('GET', '/api/v1/pedidos/' + submitted.id, undefined, 200, buyer)).notes, notes);
+      assert.equal((await json('GET', '/pedidos/' + submitted.id, undefined, 200, adminHeaders)).notes, notes);
+      const board = await json('GET', '/pedidos', undefined, 200, adminHeaders);
+      assert.equal(board.orders.find((o: any) => o.id === submitted.id).notes, notes);
+      assert.equal((await json('POST', '/api/v1/pedidos', { ...draft, notes }, 200, buyer)).id, submitted.id);
+      await json('POST', '/api/v1/pedidos', { ...draft, notes: 'Con mostaza' }, 409, buyer);
+      await json('GET', '/api/v1/pedidos/' + submitted.id, undefined, 404, customer);
+      const boundary = await json('POST', '/api/v1/pedidos', { ...draft, notes: 'a'.repeat(500) }, 201, { ...buyer, 'Idempotency-Key': randomUUID() });
+      assert.equal(boundary.notes.length, 500);
+      const blankKey = { ...buyer, 'Idempotency-Key': randomUUID() };
+      const blank = await json('POST', '/api/v1/pedidos', { ...draft, notes: '   ' }, 201, blankKey);
+      assert.equal(blank.notes, '');
+      assert.equal((await json('POST', '/api/v1/pedidos', draft, 200, blankKey)).id, blank.id);
+      await db.exec(notesMigration);
+      assert.equal((await json('GET', '/api/v1/pedidos/' + submitted.id, undefined, 200, buyer)).notes, notes);
+      await assert.rejects(() => db.query('UPDATE orders SET notes=$1 WHERE id=$2', ['a'.repeat(501), submitted.id]));
+    });
     await t.test('si falta el estado se rechazan pedidos nuevos', async () => {
+      const count = (await db.query('SELECT * FROM orders')).rows.length;
       await db.query('DELETE FROM cafe_settings WHERE id=1');
       await json('GET', '/api/v1/cafeteria', undefined, 503);
       await json('POST', '/api/v1/pedidos', draft, 503, { ...customer, 'Idempotency-Key': randomUUID() });
-      assert.equal((await db.query('SELECT * FROM orders')).rows.length, 1);
+      assert.equal((await db.query('SELECT * FROM orders')).rows.length, count);
     });
   } finally {
     t.mock.restoreAll();

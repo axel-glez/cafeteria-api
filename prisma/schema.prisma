@@ -83,6 +83,7 @@ model order_sessions {
  orders orders[]
 }
 model orders {
+ notes String @default("")
  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
  folio BigInt @unique @default(autoincrement())
  session_hash String

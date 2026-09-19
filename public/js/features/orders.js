@@ -12,6 +12,7 @@
       const selected = orders.filter(o => o.status === status.id);
       return `<section class="kanban-column"><div class="kanban-title"><span>${status.label}</span><b>${selected.length}</b></div><div class="kanban-orders">${selected.map(order => `<article class="order-card ${order.status === 'preparing' ? 'accent' : ''}">
         <strong>${escape(order.folio)}</strong><small>${escape(new Date(order.created_at).toLocaleString('es-MX'))}</small>
+        ${order.notes ? `<div class="order-notes"><strong>Indicaciones especiales</strong><p>${escape(order.notes)}</p></div>` : ''}
         <ul class="order-items">${order.items.map(i => `<li>${i.quantity} × ${escape(i.product_name)} · ${escape(i.presentation_label)}${i.volume_ml ? ` (${i.volume_ml} ml)` : ''}${i.options.length ? `<small>${i.options.map(o => escape(o.option_name)).join(', ')}</small>` : ''}</li>`).join('')}</ul>
         <div class="order-card-footer"><b>$${money(order.total)}</b>${next[order.status] ? `<button type="button" class="mini-btn" data-order-id="${order.id}" data-status="${next[order.status]}" ${pending.has(order.id) ? 'disabled' : ''}>${action[order.status]}</button>` : ''}</div>
         ${['new','preparing'].includes(order.status) ? `<button type="button" class="remove-order-btn" data-order-id="${order.id}" data-status="cancelled" ${pending.has(order.id) ? 'disabled' : ''}>Cancelar pedido</button>` : ''}

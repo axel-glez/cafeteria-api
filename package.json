@@ -15,7 +15,9 @@
     "postinstall": "prisma skills sync || exit 0",
     "access:migrate": "node scripts/migrate-access.mjs",
     "cafe:migrate": "node scripts/migrate-cafe-status.mjs",
+    "notes:migrate": "node scripts/migrate-order-notes.mjs",
     "test:cafe": "tsx --test tests/cafe-status.local.test.ts",
+    "test:notes": "tsx --test tests/cafe-status.local.test.ts tests/order-notes-panel.test.mjs",
     "account:create": "tsx scripts/create-admin.ts",
     "test:access": "tsx --test tests/access.integration.test.ts"
   },

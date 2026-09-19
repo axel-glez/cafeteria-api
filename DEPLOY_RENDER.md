@@ -20,6 +20,10 @@ Para la función de apertura/cierre, ejecutar `npm run cafe:migrate` contra la b
 del entorno **antes de desplegar el nuevo backend**. Después actualizar la app.
 El procedimiento y los contratos están en [docs/APERTURA-CIERRE.md](docs/APERTURA-CIERRE.md).
 
+Para indicaciones especiales en pedidos, ejecutar `npm run notes:migrate` antes de
+publicar el backend y después generar una build actualizada de la app. Ver
+[docs/INDICACIONES-PEDIDOS.md](docs/INDICACIONES-PEDIDOS.md).
+
 ## Para los compañeros
 
 Sustituye localhost o la IP local por la URL HTTPS asignada por Render, conservando el prefijo /api/v1 donde corresponda. Ejemplo ilustrativo: https://NOMBRE-REAL.onrender.com/api/v1/catalogo.

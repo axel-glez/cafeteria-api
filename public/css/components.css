@@ -3,6 +3,9 @@
    Botones, buscadores, paneles, productos y modal
    ========================================================= */
 
+.order-card > .order-notes { display: block; margin: 12px 0; padding: 12px; border-left: 4px solid #d18b12; border-radius: 8px; background: #fff3d9; color: #513821; }
+.order-notes p { margin: 6px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 14px; line-height: 1.5; }
+
 /* ---------- Botones ---------- */
 .icon-button {
   position: relative;

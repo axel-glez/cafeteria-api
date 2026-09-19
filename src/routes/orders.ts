@@ -12,7 +12,7 @@ export const mobileRouter=Router();
 export const ordersRouter=Router();
 const uuid=z.uuid();
 const statuses=z.enum(['new','preparing','ready','delivered','cancelled']);
-const bodySchema=z.strictObject({items:z.array(z.strictObject({variant_id:uuid,quantity:z.number().int().min(1).max(3),option_ids:z.array(uuid).max(12).default([]).refine(a=>new Set(a).size===a.length,'No repitas una opción')})).min(1).max(9)});
+const bodySchema=z.strictObject({notes:z.string().max(500,'Las indicaciones no pueden superar 500 caracteres').trim().refine(value=>!value.includes('\u0000'),'Las indicaciones contienen un carácter no válido').default(''),items:z.array(z.strictObject({variant_id:uuid,quantity:z.number().int().min(1).max(3),option_ids:z.array(uuid).max(12).default([]).refine(a=>new Set(a).size===a.length,'No repitas una opción')})).min(1).max(9)});
 const money=(cents:number)=>(cents/100).toFixed(2);
 async function transaction<T>(fn:(c:PoolClient)=>Promise<T>):Promise<T>{const c=await accessDb.connect();try{await c.query('BEGIN');await c.query("SET LOCAL lock_timeout='5s'");const result=await fn(c);await c.query('COMMIT');return result;}catch(e){await c.query('ROLLBACK');throw e;}finally{c.release();}}
 async function limit(bucket:string,max:number){
@@ -38,7 +38,7 @@ mobileRouter.post('/sesiones',async(req,res)=>{
  const result=await accessDb.query("INSERT INTO public.order_sessions(token_hash,expires_at) VALUES($1,now()+interval '7 days') RETURNING expires_at",[tokenHash(token)]);
  res.status(201).json({token,expires_at:result.rows[0].expires_at});
 });
-const orderColumns='id,folio::text,status,currency,total::text,created_at,updated_at';
+const orderColumns='id,folio::text,status,currency,total::text,notes,created_at,updated_at';
 mobileRouter.post('/notificaciones',requireCustomer,async(req,res)=>{
  const {token,enabled}=z.strictObject({token:z.string().regex(pushTokenPattern),enabled:z.boolean().default(true)}).parse(req.body);
  await limit('mobile:push:'+res.locals.customerHash,20);
@@ -60,7 +60,8 @@ async function readOrder(c:PoolClient,id:string){
 }
 mobileRouter.post('/pedidos',requireCustomer,async(req,res)=>{
  const body=bodySchema.parse(req.body),key=uuid.parse(req.get('Idempotency-Key'));
- const normalized={items:body.items.map(i=>({...i,option_ids:[...i.option_ids].sort()}))};
+ // Omitir notas vacías conserva el hash de los pedidos creados antes de esta función.
+ const normalized={items:body.items.map(i=>({...i,option_ids:[...i.option_ids].sort()})),...(body.notes?{notes:body.notes}:{})};
  const requestHash=tokenHash(JSON.stringify(normalized));
  // Contadores fuera de la transacción: no se revierten al rechazar un pedido ni agotan el pool.
  await limit('mobile:orders:global',120);await limit('mobile:orders:'+res.locals.customerHash,10);
@@ -96,7 +97,7 @@ mobileRouter.post('/pedidos',requireCustomer,async(req,res)=>{
    if(unit>9999999999||total>999999999999)throw new ApiError(400,'El importe supera el máximo permitido');
    return {item,position,variant,selected,applicable,unit,subtotal};
   });
-  const order=(await c.query('INSERT INTO public.orders(session_hash,idempotency_key,request_hash,total) VALUES($1,$2,$3,$4) RETURNING id',[res.locals.customerHash,key,requestHash,money(total)])).rows[0];
+  const order=(await c.query('INSERT INTO public.orders(session_hash,idempotency_key,request_hash,total,notes) VALUES($1,$2,$3,$4,$5) RETURNING id',[res.locals.customerHash,key,requestHash,money(total),body.notes])).rows[0];
   // Insertar por lotes evita una ida a la base por cada complemento del carrito.
   const purchased=lines.map(l=>({id:randomUUID(),order_id:order.id,variant_id:l.variant.id,product_name:l.variant.name,presentation_label:l.variant.label,volume_ml:l.variant.volume_ml,quantity:l.item.quantity,base_price:money(Number(l.variant.cents)),unit_price:money(l.unit),line_total:money(l.subtotal),position:l.position}));
   await c.query(`INSERT INTO public.order_items(id,order_id,variant_id,product_name,presentation_label,volume_ml,quantity,base_price,unit_price,line_total,position) SELECT * FROM jsonb_to_recordset($1::jsonb) AS x(id uuid,order_id uuid,variant_id uuid,product_name text,presentation_label text,volume_ml integer,quantity integer,base_price numeric,unit_price numeric,line_total numeric,position integer)`,[JSON.stringify(purchased)]);
