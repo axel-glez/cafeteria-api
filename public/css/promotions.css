@@ -1,0 +1,21 @@
+.promotions-toolbar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin: 18px 0; }
+.promotions-toolbar p { flex: 1; min-width: 200px; }
+.promotions-list { display: grid; gap: 20px; }
+.promotion-editor { display: grid; grid-template-columns: minmax(220px, 360px) minmax(0, 1fr); gap: 24px; padding: 22px; border: 1px solid #ede3d7; border-radius: 24px; background: white; }
+.promotion-preview { position: relative; min-height: 190px; border-radius: 24px; overflow: hidden; background: #392013; align-self: start; }
+.promotion-preview > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.promotion-preview::after { content: ''; position: absolute; inset: 0; background: rgba(25,12,5,.28); pointer-events: none; }
+.promotion-preview-copy { position: relative; z-index: 1; display: grid; justify-items: start; gap: 6px; padding: 22px 20px 32px; color: #fff9ef; overflow-wrap: anywhere; }
+.promotion-label { padding: 4px 8px; border-radius: 6px; background: #af691f; color: white; font-size: 10px; font-weight: 800; }
+.promotion-preview-copy strong { font: bold 21px/25px Georgia, serif; text-shadow: 0 1px 3px rgba(0,0,0,.8); }
+.promotion-preview-copy p { margin: 0; color: #f3e7da; font-size: 12px; text-shadow: 0 1px 3px rgba(0,0,0,.8); }
+.promotion-cta { background: white; color: #342419; padding: 7px 15px; border-radius: 11px; font-size: 12px; margin-top: 6px; }
+.promotion-fields { display: grid; gap: 12px; }
+.promotion-fields label { display: grid; gap: 6px; font-weight: 600; }
+.promotion-fields input:not([type=checkbox]), .promotion-fields textarea { width: 100%; min-width: 0; padding: 10px 12px; border: 1px solid #d7cfc4; border-radius: 12px; font: inherit; color: #302314; background: #fffaf3; }
+.promotion-fields textarea { min-height: 85px; resize: vertical; }
+.promotion-fields .promotion-toggle { display: flex; align-items: center; gap: 8px; }
+.promotion-toggle input { width: 18px; height: 18px; accent-color: #af691f; }
+.promotion-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+#promotionOrigins { overflow-wrap: anywhere; }
+@media (max-width: 900px) { .promotion-editor { grid-template-columns: 1fr; } }

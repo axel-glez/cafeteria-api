@@ -7,6 +7,7 @@
     user = null;
     App.orders?.stop();
     App.cafeStatus?.stop();
+    App.promotions?.stop();
     resetPasswordVisibility();
     byId('appShell').hidden = true;
     byId('loginView').hidden = false;
@@ -34,6 +35,7 @@
       App.products.initialize();
       App.orders.initialize();
       App.cafeStatus.initialize();
+      App.promotions.initialize();
       App.productModal.initialize();
       App.modifiers.initialize();
       initialized = true;
@@ -41,6 +43,7 @@
     App.navigation.showView(isAdmin() ? 'inicio' : 'pedidos');
     App.orders.start();
     App.cafeStatus.start();
+    if (isAdmin()) void App.promotions.load();
     if (isAdmin()) { await loadAccounts(); try { await App.modifiers.load(); } catch(error) { byId('modifierMessage').textContent = error.message; } }
   }
   async function loadAccounts() {

@@ -12,6 +12,13 @@ model cafe_settings {
  is_open Boolean @default(true)
  updated_at DateTime @default(dbgenerated("clock_timestamp()")) @db.Timestamptz(6)
 }
+// Singleton, límite de anuncios y RLS: prisma/sql/009_promotions.sql.
+model promotion_settings {
+ id Int @id @default(1)
+ items Json @default("[]")
+ revision Int @default(0)
+ updated_at DateTime @default(dbgenerated("clock_timestamp()")) @db.Timestamptz(6)
+}
 model products {
  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
  name String

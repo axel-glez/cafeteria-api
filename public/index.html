@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="css/responsive.css" />
     <link rel="stylesheet" href="css/login.css" />
     <link rel="stylesheet" href="css/cafe-status.css" />
+    <link rel="stylesheet" href="css/promotions.css" />
   </head>
 
   <body>
@@ -82,6 +83,11 @@
           <button class="nav-item" data-view="menu">
             <span class="nav-icon">☕</span>
             <span>Menú</span>
+          </button>
+
+          <button class="nav-item" data-view="promociones" hidden>
+            <span class="nav-icon">✦</span>
+            <span>Promociones</span>
           </button>
 
           <button class="nav-item" data-view="ventas">
@@ -294,6 +300,22 @@
         <!-- =====================================================
              VISTA: VENTAS
              ===================================================== -->
+        <section class="content" id="view-promociones">
+          <div class="page-title-row"><div><p class="eyebrow">En la app</p><h2>Promociones y novedades</h2><p class="muted">Anuncia ofertas, combos o novedades. Estos anuncios no modifican los precios ni aplican descuentos al pedido.</p></div></div>
+          <p class="muted">Usa textos y condiciones reales. La imagen puede quedar vacía para usar la foto de café. Para imágenes propias usa una ruta de assets o una URL HTTPS autorizada; no se suben archivos desde este editor.</p>
+          <details><summary>Dominios de imágenes autorizados</summary><p id="promotionOrigins" class="muted"></p></details>
+          <p id="promotionsMessage" role="status" aria-live="polite"></p>
+          <form id="promotionsForm">
+            <div class="promotions-toolbar">
+              <p id="promotionsCount" class="muted"></p>
+              <button id="refreshPromotions" type="button" class="mini-btn">Recargar promociones</button>
+              <button id="addPromotion" type="button" class="mini-btn" disabled>+ Nuevo anuncio</button>
+              <button id="publishPromotions" type="submit" class="primary-button" disabled>Publicar cambios</button>
+            </div>
+            <div id="promotionsList" class="promotions-list"></div>
+          </form>
+        </section>
+
         <section class="content" id="view-ventas">
           <div class="page-title-row">
             <div>
@@ -451,6 +473,7 @@
     <script src="js/features/products.js"></script>
     <script src="js/features/orders.js"></script>
     <script src="js/features/cafe-status.js"></script>
+    <script src="js/features/promotions.js"></script>
     <script src="js/features/product-modal.js"></script>
     <script src="js/features/modifiers.js"></script>
     <script src="js/app.js"></script>

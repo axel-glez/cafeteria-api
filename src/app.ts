@@ -11,6 +11,7 @@ import { ZodError } from "zod";
 import { productsRouter } from "./routes/products";
 import { categoriesRouter } from "./routes/categories";
 import { cafeStatusRouter } from "./routes/cafe-status";
+import { promotionsRouter, publicPromotionsRouter } from "./routes/promotions";
 
 const frontendDir = process.env.FRONTEND_DIR || path.resolve(process.cwd(), process.env.NODE_ENV === 'production' ? 'public' : '../../cafeadmin/cafeteria-admin');
 const serveFrontend = process.env.SERVE_FRONTEND !== 'false';
@@ -40,10 +41,13 @@ app.use((req, res, next) => {
   }
   next();
 });
+app.use('/promociones', express.json({ limit: '64kb' }));
 app.use(express.json({ limit: '16kb' }));
 app.use('/auth', authRouter);
 
 app.use("/api/v1", mobileRouter);
+app.use("/api/v1/promociones", publicPromotionsRouter);
+app.use("/promociones", requireSession, requireAdmin, promotionsRouter);
 app.use("/pedidos", requireSession, ordersRouter);
 app.use("/cafeteria", requireSession, cafeStatusRouter);
 app.use("/modificadores", requireSession, modifiersRouter);

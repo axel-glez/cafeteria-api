@@ -1,0 +1,34 @@
+[
+  {
+    "id": "b057e001-0922-4000-8000-000000000001",
+    "label": "MATCHA Y TARO",
+    "title": "Lunes en pareja",
+    "description": "1 Matcha de 16 oz + 1 Matcha de 20 oz por $150. O 1 Taro de 16 oz + 1 Taro de 20 oz por $150.",
+    "image": "",
+    "active": true
+  },
+  {
+    "id": "b057e001-0922-4000-8000-000000000002",
+    "label": "PROMOCIÓN",
+    "title": "Miércoles Frescholes",
+    "description": "1 smoothie de mango o fresa de 12 oz por $46.",
+    "image": "",
+    "active": true
+  },
+  {
+    "id": "b057e001-0922-4000-8000-000000000003",
+    "label": "PROMOCIÓN 3×2",
+    "title": "Viernes de mal tercio",
+    "description": "Solo viernes de 2 a 3 pm. Compra 2 bebidas y llévate una igual, tamaño mediano, gratis. Aplica en Café Moka, Café Frappe, Latte, Capuchino y Americano.",
+    "image": "",
+    "active": true
+  },
+  {
+    "id": "b057e001-0922-4000-8000-000000000004",
+    "label": "LO NUEVO",
+    "title": "Chamoyada de mango",
+    "description": "Vaso de 20 oz con banderilla de tamarindo y gomita de topping por $65.",
+    "image": "",
+    "active": true
+  }
+]

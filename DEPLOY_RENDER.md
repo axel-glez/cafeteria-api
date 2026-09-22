@@ -26,6 +26,11 @@ publicar el backend y después generar una build actualizada de la app. Ver
 
 ## Para los compañeros
 
+Para promociones compartidas, ejecutar `npm run promotions:migrate` y, si se quieren
+cargar los cuatro anuncios solicitados, `npm run promotions:seed`, antes de publicar
+el backend y generar la app actualizada. Ver [docs/PROMOCIONES.md](docs/PROMOCIONES.md).
+No hay descuentos automáticos ni activación por calendario en esta etapa.
+
 Sustituye localhost o la IP local por la URL HTTPS asignada por Render, conservando el prefijo /api/v1 donde corresponda. Ejemplo ilustrativo: https://NOMBRE-REAL.onrender.com/api/v1/catalogo.
 
 Los POST requieren Content-Type: application/json y X-Cafe-Request: 1. Crear sesión: POST /api/v1/sesiones con cuerpo {}. Las rutas de pedidos protegidas usan Authorization: Bearer con el token recibido; conserva también los requisitos de Idempotency-Key de la API. Nunca compartas DATABASE_URL.
