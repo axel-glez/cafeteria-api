@@ -14,6 +14,8 @@
     elements.menuToggle.setAttribute('aria-expanded', 'false');
     elements.menuToggle.setAttribute('aria-label', 'Abrir menú');
     document.body.classList.remove('sidebar-open');
+    document.querySelector('.main').inert = false;
+    document.querySelector('.mobile-nav').inert = false;
     if (window.innerWidth <= 880) elements.sidebar.inert = true;
     if (restoreFocus && wasOpen) elements.menuToggle.focus();
   }
@@ -27,7 +29,9 @@
     elements.menuToggle.setAttribute('aria-expanded', 'true');
     elements.menuToggle.setAttribute('aria-label', 'Cerrar menú');
     document.body.classList.add('sidebar-open');
-    elements.sidebar.querySelector('.nav-item:not([hidden])')?.focus();
+    document.querySelector('.main').inert = true;
+    document.querySelector('.mobile-nav').inert = true;
+    document.getElementById('closeSidebar').focus({ preventScroll: true });
   }
 
   function showView(viewName) {
@@ -45,6 +49,14 @@
     });
     targetNavItem.classList.add('active');
     targetNavItem.setAttribute('aria-current', 'page');
+    document.querySelectorAll('.mobile-nav [data-go]').forEach(button => {
+      if (button.dataset.go === viewName) button.setAttribute('aria-current', 'page');
+      else button.removeAttribute('aria-current');
+    });
+    document.getElementById('pageHeading').textContent = {
+      inicio: 'Nuestro turno', pedidos: 'De la cocina a la mesa', menu: 'La carta de Buster',
+      promociones: 'Novedades de la casa', configuracion: 'Nuestro equipo',
+    }[viewName];
 
     document
       .querySelectorAll('.content')
@@ -72,8 +84,15 @@
       else openMobileMenu();
     });
     elements.sidebarBackdrop.addEventListener('click', () => closeMobileMenu({ restoreFocus: true }));
+    document.getElementById('closeSidebar').addEventListener('click', () => closeMobileMenu({ restoreFocus: true }));
     document.addEventListener('keydown', event => {
       if (event.key === 'Escape') closeMobileMenu({ restoreFocus: true });
+      if (event.key === 'Tab' && elements.sidebar.classList.contains('open')) {
+        const buttons = [...elements.sidebar.querySelectorAll('button:not([hidden]):not(:disabled)')].filter(button => button.getClientRects().length);
+        const first = buttons[0], last = buttons[buttons.length - 1];
+        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+        else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+      }
     });
     window.addEventListener('resize', () => {
       if (window.innerWidth > 880) {
@@ -90,6 +109,7 @@
   }
 
   App.navigation = {
+    closeMobileMenu,
     showView,
     initialize,
   };

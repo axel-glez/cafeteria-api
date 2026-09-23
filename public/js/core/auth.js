@@ -5,6 +5,7 @@
   const isAdmin = () => user?.role === 'admin';
   function signedOut() {
     user = null;
+    App.navigation?.closeMobileMenu();
     App.orders?.stop();
     App.cafeStatus?.stop();
     App.promotions?.stop();

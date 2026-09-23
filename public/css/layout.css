@@ -7,13 +7,17 @@
 .app-shell {
   min-height: 100vh;
   display: grid;
-  grid-template-columns: 260px 1fr;
+  grid-template-columns: 236px minmax(0, 1fr);
 }
 
 .main {
   min-width: 0;
-  padding: 0 30px 40px;
+  padding: 0 clamp(18px, 2.5vw, 40px) 40px;
 }
+
+.main > *, .dashboard-grid > *, .product-grid > *, .kanban > *, .panel-heading > *, .topbar-left > div { min-width: 0; }
+.sidebar-close, .mobile-nav { display: none; }
+.catalog-feedback { margin: 0 0 14px; color: #706052; font-size: 12px; overflow-wrap: anywhere; }
 
 .content {
   display: none;
@@ -29,6 +33,7 @@
   top: 0;
   z-index: 20;
   height: 100vh;
+  height: 100dvh;
   padding: 26px 18px;
   display: flex;
   flex-direction: column;
@@ -131,7 +136,7 @@ body.modal-open {
 }
 
 .sidebar-bottom {
-  margin-top: auto;
+  margin-top: 28px;
   border-top: 1px solid rgba(255, 250, 240, 0.12);
   padding-top: 14px;
 }
@@ -185,7 +190,9 @@ body.modal-open {
   position: sticky;
   top: 0;
   z-index: 15;
-  height: 104px;
+  min-height: 88px;
+  height: auto;
+  padding-block: 14px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -203,7 +210,7 @@ body.modal-open {
 
 .topbar h1 {
   margin: 0;
-  font-size: 24px;
+  font: 700 30px/1.15 Georgia, serif;
   letter-spacing: -0.035em;
 }
 

@@ -18,8 +18,8 @@
   --success-soft: #e9f7f0;
   --danger: #c95349;
   --danger-soft: #fceae8;
-  --shadow: 0 16px 40px rgba(67, 43, 22, 0.09);
-  --radius: 24px;
+  --shadow: 0 3px 12px rgba(67, 43, 22, 0.04);
+  --radius: 18px;
 }
 
 * {
@@ -32,8 +32,12 @@ body {
     sans-serif;
   color: var(--ink);
   background: var(--canvas);
-  overflow-x: hidden;
+  line-height: 1.45;
 }
+
+html { -webkit-text-size-adjust: 100%; }
+img { max-width: 100%; }
+input, select, textarea { min-width: 0; max-width: 100%; }
 
 button,
 input,

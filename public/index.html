@@ -11,10 +11,10 @@
     <link rel="stylesheet" href="css/layout.css" />
     <link rel="stylesheet" href="css/components.css" />
     <link rel="stylesheet" href="css/pages.css" />
-    <link rel="stylesheet" href="css/responsive.css" />
     <link rel="stylesheet" href="css/login.css" />
     <link rel="stylesheet" href="css/cafe-status.css" />
     <link rel="stylesheet" href="css/promotions.css" />
+    <link rel="stylesheet" href="css/responsive.css" />
   </head>
 
   <body>
@@ -66,6 +66,7 @@
             <strong>Buster's</strong>
             <span>Beagle &amp; bagel</span>
           </div>
+          <button class="icon-button sidebar-close" id="closeSidebar" type="button" aria-label="Cerrar menú">×</button>
         </div>
 
         <nav class="nav" aria-label="Navegación principal">
@@ -111,17 +112,6 @@
       <button class="sidebar-backdrop" id="sidebarBackdrop" type="button" aria-label="Cerrar menú" tabindex="-1"></button>
 
       <main class="main">
-        <section class="panel cafe-control" aria-label="Recepción de pedidos">
-          <div class="cafe-control-copy" role="status" aria-live="polite">
-            <strong id="cafeStatusLabel">Consultando estado…</strong>
-            <p id="cafeStatusMessage"></p>
-          </div>
-          <div class="cafe-control-actions">
-            <button id="refreshCafeStatus" type="button" class="mini-btn">Actualizar estado</button>
-            <button id="toggleCafeStatus" type="button" class="primary-button" hidden disabled>Abrir cafetería</button>
-          </div>
-        </section>
-        <div class="panel" role="status" aria-live="polite"><span id="catalogStatus">Cargando catálogo…</span> <button id="retryCatalog" type="button" class="mini-btn" hidden>Reintentar</button></div>
         <header class="topbar">
           <div class="topbar-left">
             <button
@@ -136,8 +126,8 @@
 
             <img class="topbar-logo" src="assets/busters-logo.png" alt="Buster’s" width="48" height="48" />
             <div>
-              <p class="eyebrow">Panel del equipo</p>
-              <h1>Buen día, Buster's </h1>
+              <p class="eyebrow">Buster’s · Beagle &amp; bagel</p>
+              <h1 id="pageHeading">Nuestro turno</h1>
             </div>
           </div>
 
@@ -158,17 +148,30 @@
           </div>
         </header>
 
+        <section class="panel cafe-control" aria-label="Recepción de pedidos">
+          <div class="cafe-control-copy" role="status" aria-live="polite">
+            <strong id="cafeStatusLabel">Consultando estado…</strong>
+            <p id="cafeStatusMessage"></p>
+          </div>
+          <div class="cafe-control-actions">
+            <button id="refreshCafeStatus" type="button" class="icon-button" aria-label="Actualizar estado de la cafetería" title="Actualizar estado">↻</button>
+            <button id="toggleCafeStatus" type="button" class="mini-btn" hidden disabled>Abrir cafetería</button>
+          </div>
+        </section>
+        <div class="catalog-feedback" role="status" aria-live="polite"><span id="catalogStatus">Cargando catálogo…</span> <button id="retryCatalog" type="button" class="mini-btn" hidden>Reintentar</button></div>
+
         <!-- =====================================================
              VISTA: INICIO
              ===================================================== -->
         <section class="content active-view" id="view-inicio">
           <section class="buster-welcome" aria-labelledby="welcomeTitle">
             <div class="buster-welcome-copy">
-              <span class="buster-kicker">El cuartel de Buster</span>
-              <h2 id="welcomeTitle">Todo listo para un gran turno.</h2>
-              <p>Pedidos, cocina y menú en un mismo lugar. Claro, rápido y con todo el sabor de la casa.</p>
+              <span class="buster-kicker">Hecho en casa. Servido con cariño.</span>
+              <h2 id="welcomeTitle">Buen café.<br />Un gran equipo.</h2>
+              <p>Lo que pasa en Buster’s, a la mano.</p>
+              <button class="welcome-action" type="button" data-go="pedidos">Ver pedidos <span aria-hidden="true">↗</span></button>
             </div>
-            <div class="buster-welcome-mark" aria-hidden="true"><span>BU</span><small>BEAGLE<br />&amp; BAGEL</small></div>
+            <img class="buster-welcome-mark" src="assets/busters-logo.png" alt="" width="160" height="160" />
           </section>
           <div class="stats-grid">
  <article class="stat-card"><div class="stat-icon">▤</div><div><span>Pedidos activos</span><strong data-active-orders>0</strong><small>Pendientes de entrega</small></div></article>
@@ -350,6 +353,12 @@
  <p class="muted">Mínimo 0 significa opcional. Desactiva las opciones que ya no se ofrezcan.</p><div id="modifierOptions"></div><button id="addModifierOption" class="mini-btn" type="button">+ Agregar opción</button><button type="submit" class="primary-button">Guardar grupo</button></form><p id="modifierMessage" role="status"></p></div>
         </section>
       </main>
+      <nav class="mobile-nav" aria-label="Accesos del panel">
+        <button type="button" data-go="inicio"><span aria-hidden="true">⌂</span>Inicio</button>
+        <button type="button" data-go="pedidos"><span aria-hidden="true">▤</span>Pedidos</button>
+        <button type="button" data-go="menu"><span aria-hidden="true">☕</span>Menú</button>
+        <button type="button" data-go="promociones"><span aria-hidden="true">✦</span>Anuncios</button>
+      </nav>
     </div>
 
     <!-- =========================================================

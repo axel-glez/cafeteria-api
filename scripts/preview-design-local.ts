@@ -45,6 +45,13 @@ prisma.products.findMany = (async () => [{
 prisma.categories.findMany = (async () => [{ id: category, name: 'Café', created_at: new Date() }]) as typeof prisma.categories.findMany;
 prisma.modifier_groups.findMany = (async () => []) as typeof prisma.modifier_groups.findMany;
 const account = randomUUID(), token = randomBytes(32).toString('hex');
+// Exercise populated tables, every stage and long notes in the real panel.
+await db.query("INSERT INTO order_sessions(token_hash, expires_at) VALUES('visual-only', now()+interval '1 hour')");
+for (const [index, status] of ['new', 'preparing', 'ready', 'delivered', 'cancelled'].entries()) {
+  const orderId = randomUUID();
+  await db.query("INSERT INTO orders(id,session_hash,idempotency_key,request_hash,status,total,notes) VALUES($1,'visual-only',$2,'visual-only',$3,165,$4)", [orderId, randomUUID(), status, index === 0 ? 'Sin azúcar. Separar la bebida y el bagel para llevar.' : '']);
+  await db.query("INSERT INTO order_items(order_id,variant_id,product_name,presentation_label,quantity,base_price,unit_price,line_total,position) VALUES($1,$2,'Bagel de pollo con queso y café americano','Grande',2,82.5,82.5,165,0)", [orderId, variant]);
+}
 await db.query("INSERT INTO cafe_access.accounts(id,username,password_hash,role) VALUES($1,'vista_local','not-a-login-password','admin')", [account]);
 await db.query("INSERT INTO cafe_access.sessions(token_hash,account_id,expires_at) VALUES($1,$2,now()+interval '1 hour')", [tokenHash(token), account]);
 await db.query('UPDATE promotion_settings SET items=$1::jsonb WHERE id=1', [readFileSync(new URL('../content/promotions-2026-09-22.json', import.meta.url), 'utf8')]);

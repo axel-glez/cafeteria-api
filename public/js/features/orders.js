@@ -33,7 +33,7 @@
   function renderOrders() {
     App.elements.ordersBoard.innerHTML = statuses.map(status => {
       const selected = orders.filter(o => o.status === status.id);
-      return `<section class="kanban-column"><div class="kanban-title"><span>${status.label}</span><b>${selected.length}</b></div><div class="kanban-orders">${selected.map(order => `<article class="order-card ${order.status === 'preparing' ? 'accent' : ''}">
+      return `<section class="kanban-column" data-status="${status.id}"><div class="kanban-title"><span>${status.label}</span><b>${selected.length}</b></div><div class="kanban-orders">${selected.map(order => `<article class="order-card ${order.status === 'preparing' ? 'accent' : ''}">
         <strong>${escape(order.folio)}</strong><small title="${escape(new Date(order.created_at).toLocaleString('es-MX'))}">${escape(elapsed(order.created_at))}</small>
         ${order.notes ? `<div class="order-notes"><strong>Indicaciones especiales</strong><p>${escape(order.notes)}</p></div>` : ''}
         <ul class="order-items">${order.items.map(i => `<li>${i.quantity} × ${escape(i.product_name)} · ${escape(i.presentation_label)}${i.volume_ml ? ` (${i.volume_ml} ml)` : ''}${i.options.length ? `<small>${i.options.map(o => escape(o.option_name)).join(', ')}</small>` : ''}</li>`).join('')}</ul>
@@ -64,7 +64,7 @@
       const merged = new Map(all.map(order => [order.id,order]));
       recent.orders.forEach(order => merged.set(order.id,order));
       orders.splice(0,orders.length,...[...merged.values()].sort((a,b) => new Date(b.created_at)-new Date(a.created_at)));renderOrders();
-      if (Date.now() >= feedbackUntil) document.getElementById('ordersStatus').textContent = 'Pedidos sincronizados en tiempo real. Comprobación de respaldo cada 15 segundos.';
+      if (Date.now() >= feedbackUntil) document.getElementById('ordersStatus').textContent = 'Al día · Los pedidos se actualizan automáticamente.';
     } catch (error) {if (current === generation && App.auth.isSignedIn()) document.getElementById('ordersStatus').textContent = error.message;}
     finally {loading = false;if (reloadRequested) {reloadRequested = false;void loadOrders();}}
   }
