@@ -8,7 +8,7 @@ import { ApiError,catalogInclude,serializeProduct } from '../lib/catalog';
 import { drainPushJobs } from '../lib/push';
 import { pushTokenPattern } from '../lib/push-message';
 import { readCafeStatus, requireCafeOpen } from '../lib/cafe-status';
-import { emitOrderStatusUpdated } from '../lib/socket';
+import { emitOrderCreated, emitOrderStatusUpdated } from '../lib/socket';
 export const mobileRouter=Router();
 export const ordersRouter=Router();
 const uuid=z.uuid();
@@ -30,7 +30,9 @@ const requireCustomer:RequestHandler=async(req,res,next)=>{
 mobileRouter.get('/cafeteria',async(_req,res)=>{res.json(await readCafeStatus());});
 mobileRouter.get('/catalogo',async(_req,res)=>{
  const cafeteria=await readCafeStatus();
- const rows=await prisma.products.findMany({where:{archived:false,available:true,variants:{some:{archived:false,available:true}}},include:{...catalogInclude,variants:{...catalogInclude.variants,where:{archived:false,available:true}}},orderBy:[{name:'asc'},{id:'asc'}]});
+ // Agotado no significa archivado: la app necesita ambos estados para mostrarlo
+ // deshabilitado y conservar todas sus presentaciones visibles.
+ const rows=await prisma.products.findMany({where:{archived:false,variants:{some:{archived:false}}},include:catalogInclude,orderBy:[{name:'asc'},{id:'asc'}]});
  res.json({currency:'MXN',cafeteria,products:rows.map(p=>{const data=serializeProduct(p);return {...data,modifier_groups:data.modifier_groups.map(g=>({...g,options:g.options.filter(o=>o.available)}))};})});
 });
 mobileRouter.post('/sesiones',async(req,res)=>{
@@ -107,6 +109,7 @@ mobileRouter.post('/pedidos',requireCustomer,async(req,res)=>{
   await c.query("INSERT INTO public.order_status_history(order_id,to_status) VALUES($1,'new')",[order.id]);
   return {replayed:false,order:await readOrder(c,order.id)};
  });
+ if(!result.replayed)emitOrderCreated(result.order);
  res.set('Idempotency-Replayed',String(result.replayed)).location('/api/v1/pedidos/'+result.order.id).status(result.replayed?200:201).json(result.order);
 });
 mobileRouter.get('/pedidos/:id',requireCustomer,async(req,res)=>{

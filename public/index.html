@@ -90,10 +90,6 @@
             <span>Promociones</span>
           </button>
 
-          <button class="nav-item" data-view="ventas">
-            <span class="nav-icon">↗</span>
-            <span>Ventas</span>
-          </button>
         </nav>
 
         <div class="sidebar-bottom">
@@ -168,6 +164,7 @@
  <article class="stat-card"><div class="stat-icon">▤</div><div><span>Pedidos activos</span><strong data-active-orders>0</strong><small>Pendientes de entrega</small></div></article>
  <article class="stat-card"><div class="stat-icon">☕</div><div><span>En preparación</span><strong id="preparingCount">0</strong><small>En cocina</small></div></article>
  <article class="stat-card"><div class="stat-icon">✓</div><div><span>Entregados recientes</span><strong id="deliveredCount">0</strong><small>De los últimos 50 pedidos</small></div></article>
+ <button class="stat-card stat-card-button" id="exhaustedProductsCard" type="button"><div class="stat-icon">!</div><div><span>Productos agotados</span><strong id="exhaustedProductCount">0</strong><small>Ver productos agotados →</small></div></button>
  </div><div class="dashboard-grid">
             <section class="panel orders-panel">
               <div class="panel-heading">
@@ -292,6 +289,11 @@
               <option value="bebida">Bebidas</option>
               <option value="snack">Snacks</option>
             </select>
+            <select id="availabilityFilter" aria-label="Filtrar por disponibilidad">
+              <option value="todos">Todos</option>
+              <option value="disponibles">Disponibles</option>
+              <option value="agotados">Agotados</option>
+            </select>
           </div>
 
           <div class="product-grid admin-product-grid" id="menuProductGrid"></div>
@@ -316,7 +318,7 @@
           </form>
         </section>
 
-        <section class="content" id="view-ventas">
+        <section class="content" id="view-ventas" hidden>
           <div class="page-title-row">
             <div>
               <p class="eyebrow">Rendimiento</p>
@@ -468,7 +470,10 @@
       </div>
     </div>
 
+    <div id="orderToast" class="order-toast" role="status" aria-live="polite" hidden></div>
+
     <!-- JavaScript dividido por responsabilidad. El orden importa. -->
+    <script src="/socket.io/socket.io.js"></script>
     <script src="js/core/state.js"></script>
     <script src="js/core/dom.js"></script>
     <script src="js/core/api.js"></script>

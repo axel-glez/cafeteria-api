@@ -1,6 +1,6 @@
 /* =========================================================
    PRODUCTOS / MENÚ
-   Renderizado, filtros, búsqueda, activar/ocultar productos.
+   Renderizado, filtros, búsqueda y disponibilidad de productos.
    ========================================================= */
 
 (function initializeProductsFeature(App) {
@@ -9,6 +9,7 @@
 
   const escape = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'}[char]));
   const normalize = product => ({ ...product, price: Number(product.price), active: product.available });
+  const isAvailable = product => product.active && (product.variants || []).some(variant => variant.available);
   const status = document.getElementById('catalogStatus');
   const retry = document.getElementById('retryCatalog');
 
@@ -58,9 +59,10 @@
   }
 
   function getProductCard(product, { admin = false } = {}) {
-    const availabilityClass = product.active ? '' : 'off';
-    const availabilityText = product.active ? 'Disponible' : 'Agotado';
-    const actionText = product.active ? 'Ocultar' : 'Activar';
+    const available = isAvailable(product);
+    const availabilityClass = available ? '' : 'off';
+    const availabilityText = available ? 'Disponible' : 'Agotado';
+    const actionText = product.active ? 'Marcar agotado' : 'Marcar disponible';
 
     return `
       <article
@@ -78,7 +80,7 @@
           <p class="product-description">${escape(product.description)}</p>
           ${(product.variants?.length > 1 || product.variants?.[0]?.label !== 'Único' && product.variants?.length) ? `<div class="product-sizes">${product.variants.map(variant => `<span><b>${escape(variant.label)}</b>${variant.volume_ml ? ` <small>${escape(variant.volume_ml)} ml</small>` : ''}<strong>$${Number(variant.price).toFixed(2)}</strong></span>`).join('')}</div>` : ''}
 
-          ${admin ? '<div class="variant-availability">' + (product.variants || []).map(v => '<button type="button" class="mini-btn" data-toggle-variant="' + escape(v.id) + '" data-product-id="' + escape(product.id) + '">' + escape(v.label) + ': ' + (v.available ? 'disponible' : 'agotado') + '</button>').join('') + '</div>' : ''}
+          ${admin ? '<div class="variant-availability">' + (product.variants || []).map(v => '<button type="button" class="mini-btn" data-toggle-variant="' + escape(v.id) + '" data-product-id="' + escape(product.id) + '">' + escape(v.label) + ': ' + (v.available ? 'Marcar agotado' : 'Marcar disponible') + '</button>').join('') + '</div>' : ''}
           <div class="product-meta">
             <span class="product-price">${product.variants?.length > 1 ? 'Desde ' : ''}$${Number(product.price).toFixed(2)}</span>
             <span class="availability ${availabilityClass}">${availabilityText}</span>
@@ -88,8 +90,7 @@
             admin
               ? `
                 <div class="card-actions">
-                  ${App.auth.isAdmin() ? `<button class="mini-btn" type="button" data-edit-product="${escape(product.id)}">Editar</button>
-                  <button class="mini-btn" type="button" data-delete-product="${escape(product.id)}">Archivar</button>` : ''}
+                  ${App.auth.isAdmin() ? `<button class="mini-btn" type="button" data-edit-product="${escape(product.id)}">Editar</button>` : ''}
                   <button
                     class="mini-btn"
                     type="button"
@@ -110,7 +111,7 @@
     return document.querySelector('.tab.active')?.dataset.category || 'todos';
   }
 
-  function getFilteredProducts(category = 'todos', query = '') {
+  function getFilteredProducts(category = 'todos', query = '', availability = 'todos') {
     const simplify = value => value.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
     const normalizedQuery = simplify(query.trim());
 
@@ -119,8 +120,10 @@
         category === 'todos' || product.category === category;
       const matchesQuery =
         !normalizedQuery || simplify(product.name).includes(normalizedQuery);
+      const available = isAvailable(product);
+      const matchesAvailability = availability === 'todos' || (availability === 'disponibles' ? available : !available);
 
-      return matchesCategory && matchesQuery;
+      return matchesCategory && matchesQuery && matchesAvailability;
     });
   }
 
@@ -134,7 +137,7 @@
   }
 
   function renderAdminProducts(category = 'todos', query = '') {
-    const filteredProducts = getFilteredProducts(category, query);
+    const filteredProducts = getFilteredProducts(category, query, document.getElementById('availabilityFilter').value);
 
     elements.menuProductGrid.innerHTML = filteredProducts.length
       ? filteredProducts
@@ -144,7 +147,9 @@
   }
 
   function refreshProductViews() {
-    document.getElementById('productCount').textContent = `${products.filter(product => product.active).length} productos disponibles`;
+    const availableCount = products.filter(isAvailable).length;
+    document.getElementById('productCount').textContent = `${availableCount} productos disponibles`;
+    document.getElementById('exhaustedProductCount').textContent = products.length - availableCount;
     renderProducts(getActiveHomeCategory());
     renderAdminProducts(elements.menuFilter.value, elements.menuSearch.value);
   }
@@ -177,14 +182,6 @@
     status.textContent = 'Producto actualizado.';
   }
 
-  async function deleteProduct(productId) {
-    await App.api('/productos/' + encodeURIComponent(productId), { method: 'DELETE' });
-    const index = products.findIndex(item => item.id === productId);
-    if (index !== -1) products.splice(index, 1);
-    refreshProductViews();
-    status.textContent = 'Producto archivado.';
-  }
-
   function initializeCategoryTabs() {
     document.querySelectorAll('.tab').forEach((button) => {
       button.addEventListener('click', () => {
@@ -207,11 +204,22 @@
       renderAdminProducts(elements.menuFilter.value, event.target.value);
     });
 
+    document.getElementById('availabilityFilter').addEventListener('change', () => {
+      renderAdminProducts(elements.menuFilter.value, elements.menuSearch.value);
+    });
+
+    document.getElementById('exhaustedProductsCard').addEventListener('click', () => {
+      App.navigation.showView('menu');
+      document.getElementById('availabilityFilter').value = 'agotados';
+      renderAdminProducts(elements.menuFilter.value, elements.menuSearch.value);
+    });
+
     elements.globalSearch.addEventListener('keydown', (event) => {
       if (event.key !== 'Enter') return;
 
       App.navigation.showView('menu');
       elements.menuFilter.value = 'todos';
+      document.getElementById('availabilityFilter').value = 'todos';
       elements.menuSearch.value = event.target.value;
       renderAdminProducts('todos', event.target.value);
     });
@@ -229,25 +237,21 @@
         try { const updated = await App.api('/productos/' + product.id + '/variantes/' + variant.id,{method:'PATCH',body:JSON.stringify({available:!variant.available})});Object.assign(product,normalize(updated));refreshProductViews();status.textContent = 'Disponibilidad guardada.'; } catch(error) {status.textContent = error.message;} finally {variantButton.disabled = false;}
         return;
       }
-      const button = event.target.closest('[data-toggle-product], [data-edit-product], [data-delete-product]');
+      const button = event.target.closest('[data-toggle-product], [data-edit-product]');
       if (!button || button.disabled) return;
-      const id = button.dataset.toggleProduct || button.dataset.editProduct || button.dataset.deleteProduct;
+      const id = button.dataset.toggleProduct || button.dataset.editProduct;
       const product = products.find(item => item.id === id);
       if (!product || pending.has(id)) return;
       if (button.dataset.editProduct) {
         App.productModal.open(product);
         return;
       }
-      if (button.dataset.deleteProduct && !window.confirm(`¿Archivar "${product.name}"? Dejará de ofrecerse; sus pedidos se conservarán.`)) return;
       pending.add(id);
       const buttons = button.closest('.card-actions').querySelectorAll('button');
       buttons.forEach(item => { item.disabled = true; });
       try {
-        if (button.dataset.deleteProduct) await deleteProduct(id);
-        else {
-          await toggleProduct(id);
-          status.textContent = 'Disponibilidad guardada.';
-        }
+        await toggleProduct(id);
+        status.textContent = product.active ? 'Producto marcado como disponible.' : 'Producto marcado como agotado.';
       } catch (error) { status.textContent = error.message; }
       finally {
         pending.delete(id);
@@ -273,7 +277,6 @@
     loadCatalog,
     addProduct,
     updateProduct,
-    deleteProduct,
     refreshProductViews,
     renderProducts,
     renderAdminProducts,

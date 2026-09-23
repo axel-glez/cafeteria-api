@@ -56,6 +56,12 @@ test('Pedidos: opciones, importes, reintentos, permisos, historial y archivo',{t
   assert.equal((await request('DELETE','/productos/'+p.id)).status,403);
   assert.equal((await request('POST','/modificadores',{name:'No permitido'})).status,403);
   await json('PATCH','/productos/'+p.id+'/variantes/'+v.id,{available:false});
+  const catalogWithExhaustedVariant=await json('GET','/api/v1/catalogo',undefined);
+  const visibleProduct=catalogWithExhaustedVariant.products.find((item:any)=>item.id===p.id);
+  assert.ok(visibleProduct);assert.equal(visibleProduct.variants.find((item:any)=>item.id===v.id).available,false);
+  await json('PATCH','/productos/'+p.id,{available:false});
+  const catalogWithExhaustedProduct=await json('GET','/api/v1/catalogo',undefined);
+  assert.equal(catalogWithExhaustedProduct.products.find((item:any)=>item.id===p.id).available,false);
   assert.equal((await request('POST','/api/v1/pedidos',draft,{...customer,'Idempotency-Key':randomUUID()})).status,409);
   assert.equal((await request('PATCH','/pedidos/'+a.id+'/estado',{from_status:'new',status:'delivered'})).status,409);
   await json('PATCH','/pedidos/'+a.id+'/estado',{from_status:'new',status:'preparing'});

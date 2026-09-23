@@ -66,6 +66,21 @@ export function emitOrderStatusUpdated(order: { id: string; status: string; upda
     updatedAt: new Date(order.updated_at).toISOString(),
   };
   io?.to(orderRoom(id)).emit('order-status-updated', payload);
+  io?.emit('admin-orders-updated', { type: 'status', ...payload });
   if (process.env.NODE_ENV !== 'production') console.info(`[socket] ${payload.orderId} -> ${payload.status}`);
+  return payload;
+}
+
+export function emitOrderCreated(order: { id: string; folio: string; created_at: Date | string }) {
+  const payload = {
+    type: 'created' as const,
+    orderId: orderIdSchema.parse(order.id),
+    folio: z.string().trim().min(1).max(40).parse(order.folio),
+    createdAt: new Date(order.created_at).toISOString(),
+  };
+  // El evento no contiene artículos, notas ni datos de sesión. El panel autenticado
+  // consulta el pedido por REST; los clientes móviles simplemente ignoran el evento.
+  io?.emit('admin-orders-updated', payload);
+  if (process.env.NODE_ENV !== 'production') console.info(`[socket] nuevo pedido ${payload.folio}`);
   return payload;
 }
