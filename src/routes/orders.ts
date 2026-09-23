@@ -8,6 +8,7 @@ import { ApiError,catalogInclude,serializeProduct } from '../lib/catalog';
 import { drainPushJobs } from '../lib/push';
 import { pushTokenPattern } from '../lib/push-message';
 import { readCafeStatus, requireCafeOpen } from '../lib/cafe-status';
+import { emitOrderStatusUpdated } from '../lib/socket';
 export const mobileRouter=Router();
 export const ordersRouter=Router();
 const uuid=z.uuid();
@@ -122,6 +123,7 @@ mobileRouter.patch('/pedidos/:id/cancelacion',requireCustomer,async(req,res)=>{
   await c.query("INSERT INTO public.order_status_history(order_id,from_status,to_status) VALUES($1,'new','cancelled')",[id]);
   return readOrder(c,id);
  });
+ emitOrderStatusUpdated(order);
  res.json(order);
 });
 ordersRouter.get('/',async(req,res)=>{
@@ -137,7 +139,7 @@ ordersRouter.get('/:id',async(req,res)=>{const id=uuid.parse(req.params.id);res.
 ordersRouter.patch('/:id/estado',async(req,res)=>{
  const id=uuid.parse(req.params.id);const data=z.strictObject({from_status:statuses,status:statuses}).parse(req.body);
  const next:Record<string,string[]>={new:['preparing','cancelled'],preparing:['ready','cancelled'],ready:['delivered'],delivered:[],cancelled:[]};
- res.json(await transaction(async c=>{
+ const order=await transaction(async c=>{
   const current=(await c.query('SELECT status FROM public.orders WHERE id=$1 FOR UPDATE',[id])).rows[0];
   if(!current)throw new ApiError(404,'Pedido no encontrado');
   if(current.status!==data.from_status)throw new ApiError(409,'El pedido cambió. Actualiza el tablero');
@@ -150,7 +152,9 @@ ordersRouter.patch('/:id/estado',async(req,res)=>{
     JOIN public.order_sessions s ON s.token_hash=o.session_hash AND s.expires_at>now()
     WHERE o.id=$1 ON CONFLICT DO NOTHING`,[id]);
   return readOrder(c,id);
- }));
+ });
+ emitOrderStatusUpdated(order);
+ res.json(order);
  void drainPushJobs();
 });
 

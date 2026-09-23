@@ -10,8 +10,8 @@ export const mobileCors:RequestHandler=(req,res,next)=>{
   res.set('Access-Control-Expose-Headers','Idempotency-Replayed, Location');
   if(req.method==='OPTIONS'){
    const headers=(req.get('access-control-request-headers')||'').toLowerCase().split(',').map(v=>v.trim()).filter(Boolean);
-   if(!['GET','POST'].includes(req.get('access-control-request-method')||'')||headers.some(h=>!['authorization','content-type','x-cafe-request','idempotency-key'].includes(h))){res.status(403).end();return;}
-   res.set('Access-Control-Allow-Methods','GET, POST');res.set('Access-Control-Allow-Headers','Authorization, Content-Type, X-Cafe-Request, Idempotency-Key');res.status(204).end();return;
+   if(!['GET','POST','PATCH'].includes(req.get('access-control-request-method')||'')||headers.some(h=>!['authorization','content-type','x-cafe-request','idempotency-key'].includes(h))){res.status(403).end();return;}
+   res.set('Access-Control-Allow-Methods','GET, POST, PATCH');res.set('Access-Control-Allow-Headers','Authorization, Content-Type, X-Cafe-Request, Idempotency-Key');res.status(204).end();return;
   }
  }
  next();
