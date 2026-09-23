@@ -1,6 +1,6 @@
 /* =========================================================
    PÁGINAS
-   Inicio, Pedidos, Menú, Ventas y Configuración
+   Inicio, Pedidos, Menú y Configuración
    ========================================================= */
 /* Dashboard */
 .stats-grid {
@@ -441,41 +441,6 @@
   border-radius: 14px;
   padding: 0 14px;
   background: #fff;
-}
-
-/* Sales chart */
-.chart-card {
-  margin-top: 18px;
-}
-
-.chart {
-  height: 300px;
-  border: 1px dashed #eadac1;
-  border-radius: 18px;
-  padding: 24px 20px 30px;
-  display: flex;
-  align-items: end;
-  gap: 22px;
-  background: linear-gradient(to top, #fbf6ec, #fff);
-}
-
-.bar {
-  position: relative;
-  flex: 1;
-  min-width: 24px;
-  max-width: 90px;
-  border-radius: 10px 10px 4px 4px;
-  background: var(--orange);
-  box-shadow: inset 0 -8px 0 rgba(243, 154, 18, 0.1);
-}
-
-.bar span {
-  position: absolute;
-  bottom: -24px;
-  left: 50%;
-  color: #888;
-  font-size: 10px;
-  transform: translateX(-50%);
 }
 
 /* Empty states */

@@ -84,3 +84,10 @@ export function emitOrderCreated(order: { id: string; folio: string; created_at:
   if (process.env.NODE_ENV !== 'production') console.info(`[socket] nuevo pedido ${payload.folio}`);
   return payload;
 }
+
+export function emitCatalogUpdated() {
+  const payload = { updatedAt: new Date().toISOString() };
+  io?.emit('catalog-updated', payload);
+  if (process.env.NODE_ENV !== 'production') console.info('[socket] catálogo actualizado');
+  return payload;
+}

@@ -14,7 +14,7 @@ import { cafeStatusRouter } from "./routes/cafe-status";
 import { promotionsRouter, publicPromotionsRouter } from "./routes/promotions";
 import { mediaRouter, publicMediaRouter } from "./routes/media";
 
-const frontendDir = process.env.FRONTEND_DIR || path.resolve(process.cwd(), process.env.NODE_ENV === 'production' ? 'public' : '../../cafeadmin/cafeteria-admin');
+const frontendDir = process.env.FRONTEND_DIR || path.resolve(process.cwd(), 'public');
 const serveFrontend = process.env.SERVE_FRONTEND !== 'false';
 const imageOrigins: string[] = serveFrontend ? JSON.parse(readFileSync(path.join(frontendDir, 'assets/image-origins.json'), 'utf8')) : [];
 for (const origin of imageOrigins) {

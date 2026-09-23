@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import { test } from 'node:test';
-import { emitOrderCreated, emitOrderStatusUpdated, isSocketOriginAllowed, orderRoom } from '../src/lib/socket';
+import { emitCatalogUpdated, emitOrderCreated, emitOrderStatusUpdated, isSocketOriginAllowed, orderRoom } from '../src/lib/socket';
 
 test('room y evento de pedido validan UUID, estado y fecha', () => {
   const id = randomUUID();
@@ -28,4 +28,10 @@ test('CORS de Socket.IO permite app nativa, web local y orígenes configurados',
   assert.equal(isSocketOriginAllowed('https://app.busters.example', configured), true);
   assert.equal(isSocketOriginAllowed('https://sitio-ajeno.example', configured), false);
   assert.equal(isSocketOriginAllowed('http://127.0.0.1.evil.test:5180', configured), false);
+});
+
+test('evento de catálogo incluye una fecha válida sin exponer datos administrativos', () => {
+  const payload = emitCatalogUpdated();
+  assert.deepEqual(Object.keys(payload), ['updatedAt']);
+  assert.ok(Number.isFinite(Date.parse(payload.updatedAt)));
 });

@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { prisma } from '../lib/prisma';
 import { catalogInclude, serializeProduct, ApiError } from '../lib/catalog';
+import { emitCatalogUpdated } from '../lib/socket';
 const uuid=z.uuid();
 const text=z.string().trim().min(1,'Este campo no puede estar vacío');
 export const priceSchema=z.number().min(0).max(99999999.99).refine(v=>/^\d+(\.\d{1,2})?$/.test(String(v)),'El precio debe tener como máximo dos decimales');
@@ -16,18 +17,18 @@ productsRouter.get('/',async(req,res)=>{
  const rows=await prisma.products.findMany({where:{archived:false,...(q.category?{category_details:{name:q.category}}:{}),...(q.category_id?{category_id:q.category_id}:{})},include:catalogInclude,orderBy:[{created_at:'desc'},{id:'asc'}]});res.json(rows.map(serializeProduct));
 });
 productsRouter.get('/:id',async(req,res)=>res.json(serializeProduct(await prisma.products.findFirstOrThrow({where:{id:uuid.parse(req.params.id),archived:false},include:catalogInclude}))));
-productsRouter.post('/',async(req,res)=>{const p=await save(undefined,create.parse(req.body));res.location('/productos/'+p.id).status(201).json(p);});
-productsRouter.put('/:id',async(req,res)=>res.json(await save(uuid.parse(req.params.id),create.parse(req.body))));
-productsRouter.patch('/:id',async(req,res)=>res.json(await save(uuid.parse(req.params.id),patch.parse(req.body))));
+productsRouter.post('/',async(req,res)=>{const p=await save(undefined,create.parse(req.body));emitCatalogUpdated();res.location('/productos/'+p.id).status(201).json(p);});
+productsRouter.put('/:id',async(req,res)=>{const p=await save(uuid.parse(req.params.id),create.parse(req.body));emitCatalogUpdated();res.json(p);});
+productsRouter.patch('/:id',async(req,res)=>{const p=await save(uuid.parse(req.params.id),patch.parse(req.body));emitCatalogUpdated();res.json(p);});
 productsRouter.delete('/:id',async(req,res)=>{
  const id=uuid.parse(req.params.id);
- await prisma.$transaction(async tx=>{await tx.$queryRaw`SELECT id FROM public.products WHERE id=${id}::uuid FOR UPDATE`;await tx.products.findFirstOrThrow({where:{id,archived:false}});await tx.products.update({where:{id},data:{archived:true,available:false}});});res.status(204).end();
+ await prisma.$transaction(async tx=>{await tx.$queryRaw`SELECT id FROM public.products WHERE id=${id}::uuid FOR UPDATE`;await tx.products.findFirstOrThrow({where:{id,archived:false}});await tx.products.update({where:{id},data:{archived:true,available:false}});});emitCatalogUpdated();res.status(204).end();
 });
 productsRouter.patch('/:id/variantes/:variantId',async(req,res)=>{
  const id=uuid.parse(req.params.id),variantId=uuid.parse(req.params.variantId);
  const data=z.strictObject({available:z.boolean()}).parse(req.body);
  await prisma.$transaction(async tx=>{await tx.$queryRaw`SELECT id FROM public.products WHERE id=${id}::uuid FOR UPDATE`;await tx.products.findFirstOrThrow({where:{id,archived:false}});await tx.product_variants.findFirstOrThrow({where:{id:variantId,product_id:id,archived:false}});await tx.product_variants.update({where:{id:variantId},data});});
- res.json(serializeProduct(await prisma.products.findUniqueOrThrow({where:{id},include:catalogInclude})));
+ const product=serializeProduct(await prisma.products.findUniqueOrThrow({where:{id},include:catalogInclude}));emitCatalogUpdated();res.json(product);
 });
 async function save(id:string|undefined,data:z.infer<typeof patch>){
  return prisma.$transaction(async tx=>{

@@ -17,7 +17,7 @@ npm run promotions:seed
 
 1. La migración `009_promotions.sql` crea únicamente `public.promotion_settings`, con RLS y sin acceso directo de `anon` ni `authenticated`. No toca pedidos ni catálogo. Es repetible y no reemplaza anuncios existentes.
 2. La carga añade los cuatro anuncios de `content/promotions-2026-09-22.json`, solicitados por el usuario. Conserva los existentes y las ediciones de los mismos IDs. Si se repite, no duplica; si no caben en el límite de 12, revierte sin cambiar datos. Los anuncios añadidos quedan activos.
-3. Publicar el backend con `public/` actualizado; los archivos del panel ya están sincronizados desde `cafeteria-admin/`. Subir también `content/`, `scripts/` y la migración. No subir `.env`.
+3. Publicar el backend con su directorio `public/` actualizado. Subir también `content/`, `scripts/` y la migración. No subir `.env`.
 4. Verificar `GET /api/v1/promociones` y la sección **Promociones** con una cuenta administradora. Generar e instalar una nueva build de `bustersDog-main/my-app`.
 
 La migración y la carga no se ejecutan automáticamente al arrancar ni durante el build. Se evita que un despliegue sobrescriba contenido.

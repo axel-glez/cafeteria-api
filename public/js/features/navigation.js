@@ -1,6 +1,6 @@
 /* =========================================================
    NAVEGACIÓN
-   Cambio entre Inicio, Pedidos, Menú, Ventas y Configuración.
+   Cambio entre Inicio, Pedidos, Menú y Configuración.
    ========================================================= */
 
 (function initializeNavigationFeature(App) {

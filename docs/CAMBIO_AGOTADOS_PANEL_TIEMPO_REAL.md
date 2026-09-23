@@ -4,11 +4,12 @@
 
 - El panel ya no ofrece la acción de archivar productos. La disponibilidad se controla con **Marcar agotado** y **Marcar disponible**.
 - El panel permite filtrar productos por todos, disponibles o agotados, e Inicio muestra el total de agotados con acceso directo al filtro.
-- La sección Ventas simulada quedó fuera de la navegación y oculta temporalmente.
+- Se retiró la sección Ventas simulada porque no formaba parte del MVP ni de la navegación.
 - Los pedidos muestran el tiempo transcurrido y usan textos de avance más claros.
 - La API emite `admin-orders-updated` después de crear o actualizar un pedido. El panel actualiza el tablero inmediatamente y conserva la consulta cada 15 segundos como respaldo.
 - Al recibir un pedido se muestra un aviso discreto y se intenta reproducir un sonido corto si el navegador lo permite.
 - El catálogo móvil conserva productos y variantes con `available=false`; la app los presenta como agotados y bloquea su selección y compra.
+- Cada cambio del catálogo emite `catalog-updated` por Socket.IO. La app recarga el catálogo con una sola solicitud compartida y también lo actualiza al recuperar el foco de la pantalla principal.
 - La validación del servidor al confirmar un pedido no cambió: solo acepta productos y variantes disponibles.
 
 ## Archivos principales
