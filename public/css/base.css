@@ -4,20 +4,22 @@
    ========================================================= */
 
 :root {
-  --orange: #ffb338;
-  --orange-strong: #f39a12;
-  --orange-soft: #fff3df;
-  --ink: #1e1e1e;
-  --muted: #77736f;
-  --line: #ece8e2;
+  --orange: #f5aa32;
+  --orange-strong: #c87410;
+  --orange-soft: #fff0cf;
+  --ink: #24170f;
+  --cocoa: #382317;
+  --cream: #fffaf0;
+  --muted: #75685f;
+  --line: #eadfce;
   --paper: #ffffff;
-  --canvas: #f7f6f3;
+  --canvas: #f8f2e7;
   --success: #2f9e6f;
   --success-soft: #e9f7f0;
   --danger: #c95349;
   --danger-soft: #fceae8;
-  --shadow: 0 16px 40px rgba(40, 30, 15, 0.08);
-  --radius: 22px;
+  --shadow: 0 16px 40px rgba(67, 43, 22, 0.09);
+  --radius: 24px;
 }
 
 * {
@@ -30,6 +32,7 @@ body {
     sans-serif;
   color: var(--ink);
   background: var(--canvas);
+  overflow-x: hidden;
 }
 
 button,

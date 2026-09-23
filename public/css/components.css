@@ -45,7 +45,7 @@
 }
 
 .primary-button {
-  color: var(--ink);
+  color: #2e1c0f;
   background: var(--orange);
   box-shadow: 0 8px 20px rgba(243, 154, 18, 0.18);
 }
@@ -178,7 +178,7 @@ textarea:focus-visible {
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: 18px;
-  background: #fff;
+  background: rgba(255, 253, 248, 0.96);
   min-width: 0;
 }
 

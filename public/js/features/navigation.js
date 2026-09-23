@@ -7,20 +7,23 @@
   const elements = App.elements;
 
   function closeMobileMenu({ restoreFocus = false } = {}) {
-    if (!elements.sidebar.classList.contains('open')) return;
+    const wasOpen = elements.sidebar.classList.contains('open');
     elements.sidebar.classList.remove('open');
     elements.sidebarBackdrop.classList.remove('open');
+    elements.sidebarBackdrop.setAttribute('aria-hidden', 'true');
     elements.menuToggle.setAttribute('aria-expanded', 'false');
     elements.menuToggle.setAttribute('aria-label', 'Abrir menú');
     document.body.classList.remove('sidebar-open');
     if (window.innerWidth <= 880) elements.sidebar.inert = true;
-    if (restoreFocus) elements.menuToggle.focus();
+    if (restoreFocus && wasOpen) elements.menuToggle.focus();
   }
 
   function openMobileMenu() {
+    elements.sidebar.scrollTop = 0;
     elements.sidebar.inert = false;
     elements.sidebar.classList.add('open');
     elements.sidebarBackdrop.classList.add('open');
+    elements.sidebarBackdrop.setAttribute('aria-hidden', 'false');
     elements.menuToggle.setAttribute('aria-expanded', 'true');
     elements.menuToggle.setAttribute('aria-label', 'Cerrar menú');
     document.body.classList.add('sidebar-open');
@@ -63,6 +66,7 @@
   }
 
   function initializeMobileMenu() {
+    closeMobileMenu();
     elements.menuToggle.addEventListener('click', () => {
       if (elements.sidebar.classList.contains('open')) closeMobileMenu({ restoreFocus: true });
       else openMobileMenu();
