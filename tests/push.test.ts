@@ -3,12 +3,15 @@ import { test } from 'node:test';
 import { orderPushMessage, pushTokenPattern } from '../src/lib/push-message';
 
 test('avisos contienen el pedido correcto y no incluyen credenciales', () => {
- const payload=orderPushMessage({token:'ExpoPushToken[abcdefghijklmnop]',order_id:'pedido-1',status:'ready',folio:'B-42'});
- assert.equal(payload.channelId,'orders'); assert.match(payload.body!,/listo/);
- assert.deepEqual(payload.data,{orderId:'pedido-1',status:'ready'});
+ const payload=orderPushMessage({token:'ExpoPushToken[abcdefghijklmnop]',order_id:'pedido-1',status:'ready',folio:'B-42',product_name:'Matcha 20 oz',additional_products:1});
+ assert.equal(payload.channelId,'orders');
+ assert.match(payload.title,/B-42/); assert.match(payload.body!,/B-42/); assert.match(payload.body!,/listo/i);
+ assert.match(payload.body!,/Matcha 20 oz/); assert.match(payload.body!,/1 producto más/);
+ assert.deepEqual(payload.data,{orderId:'pedido-1',status:'ready',folio:'B-42',productName:'Matcha 20 oz'});
  assert.equal('session_hash' in payload,false);
  assert.ok(pushTokenPattern.test(payload.to)); assert.ok(!pushTokenPattern.test('https://ajeno.example'));
- assert.throws(()=>orderPushMessage({token:payload.to,order_id:'1',status:'invalid',folio:'B-1'}));
+ assert.throws(()=>orderPushMessage({token:payload.to,order_id:'1',status:'invalid',folio:'B-1',product_name:'Latte'}));
+ assert.throws(()=>orderPushMessage({token:payload.to,order_id:'1',status:'ready',folio:'B-1',product_name:' '}));
 });
 
 test('cola: ticket, recibo, token inválido y fallo transitorio', async () => {
@@ -23,6 +26,7 @@ test('cola: ticket, recibo, token inválido y fallo transitorio', async () => {
    (accessDb as any).query=async(sql:string,args:any[]=[])=>{
     queries.push({sql,args});
     if(sql.includes('RETURNING *')) {if(claimed)return {rows:[]};claimed=true;return {rows:[job]};}
+    if(sql.includes('FROM public.order_items'))return {rows:[{product_name:'Latte',additional_products:0}],rowCount:1};
     return {rows:[],rowCount:mode==='wrongSession'?0:1};
    };
    globalThis.fetch=async()=>{

@@ -36,7 +36,11 @@ export async function drainPushJobs() {
           result = response.data?.[job.ticket_id];
           if (!result) { await accessDb.query("UPDATE public.order_push_jobs SET next_attempt_at=now()+interval '2 minutes' WHERE id=$1", [job.id]); continue; }
         } else {
-          const response = await expo('send', [orderPushMessage(job)]);
+          const products = await accessDb.query(`SELECT product_name,
+            greatest((SELECT count(*)::int-1 FROM public.order_items WHERE order_id=$1),0) AS additional_products
+            FROM public.order_items WHERE order_id=$1 ORDER BY position LIMIT 1`, [job.order_id]);
+          if (!products.rows[0]) throw new Error('OrderWithoutItems');
+          const response = await expo('send', [orderPushMessage({ ...job, ...products.rows[0] })]);
           result = response.data?.[0];
           if (result?.status === 'ok' && typeof result.id === 'string') {
             await accessDb.query("UPDATE public.order_push_jobs SET ticket_id=$2,next_attempt_at=now()+interval '15 minutes' WHERE id=$1", [job.id, result.id]);
