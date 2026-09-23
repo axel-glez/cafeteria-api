@@ -16,6 +16,14 @@ function allowedOrigins() {
   ].map(value => value?.trim()).filter((value): value is string => Boolean(value)));
 }
 
+export function isSocketOriginAllowed(origin: string | undefined, configured = allowedOrigins()) {
+  if (!origin) return true; // React Native y clientes nativos no envían Origin.
+  // La web local puede consumir la API HTTPS de Render durante desarrollo.
+  // Esto solo habilita el handshake Socket.IO; no concede cookies ni acceso al panel.
+  if (/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) return true;
+  return configured.has(origin);
+}
+
 export function initializeSocket(server: HttpServer) {
   if (io) return io;
   const origins = allowedOrigins();
@@ -23,8 +31,8 @@ export function initializeSocket(server: HttpServer) {
     connectionStateRecovery: { maxDisconnectionDuration: 2 * 60 * 1000, skipMiddlewares: true },
     cors: {
       origin(origin, callback) {
-        const local = process.env.NODE_ENV !== 'production' && /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin || '');
-        callback(origin === undefined || origins.has(origin) || local ? null : new Error('Origen no autorizado'), origin === undefined || origins.has(origin) || local);
+        const allowed = isSocketOriginAllowed(origin, origins);
+        callback(allowed ? null : new Error('Origen no autorizado'), allowed);
       },
       methods: ['GET', 'POST'],
     },

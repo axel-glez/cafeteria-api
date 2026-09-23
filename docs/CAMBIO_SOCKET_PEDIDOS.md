@@ -26,3 +26,7 @@ No requiere migración de base de datos.
 - Pruebas de Socket.IO y push: 3 aprobadas.
 - Prueba real cliente-servidor: conexión, `join-order`, room y recepción de `order-status-updated` correctas.
 - Se confirmó que el payload no acepta estados ajenos al modelo actual.
+
+## Compatibilidad web
+
+El navegador local envía una cabecera `Origin`, a diferencia de Android. Socket.IO permite explícitamente `http://localhost:<puerto>` y `http://127.0.0.1:<puerto>` para que Expo Web pueda conectarse a la API de Render durante desarrollo. Los demás orígenes continúan limitados a `MOBILE_ORIGINS`, `APP_ORIGIN` y `RENDER_EXTERNAL_URL`. Esta excepción no habilita cookies ni rutas administrativas.
