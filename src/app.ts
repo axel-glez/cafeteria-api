@@ -12,6 +12,7 @@ import { productsRouter } from "./routes/products";
 import { categoriesRouter } from "./routes/categories";
 import { cafeStatusRouter } from "./routes/cafe-status";
 import { promotionsRouter, publicPromotionsRouter } from "./routes/promotions";
+import { mediaRouter, publicMediaRouter } from "./routes/media";
 
 const frontendDir = process.env.FRONTEND_DIR || path.resolve(process.cwd(), process.env.NODE_ENV === 'production' ? 'public' : '../../cafeadmin/cafeteria-admin');
 const serveFrontend = process.env.SERVE_FRONTEND !== 'false';
@@ -36,17 +37,22 @@ app.use((req, res, next) => {
   if (['GET', 'HEAD', 'OPTIONS'].includes(req.method)) { next(); return; }
   const origin = req.get('origin');
   const allowed = process.env.APP_ORIGIN || process.env.RENDER_EXTERNAL_URL || `http://localhost:${process.env.PORT || 5000}`;
-  if ((origin && origin !== allowed && !res.locals.mobileOriginAllowed) || req.get('X-Cafe-Request') !== '1' || req.get('content-type')?.split(';')[0].trim().toLowerCase() !== 'application/json' || (req.get('sec-fetch-site') === 'cross-site' && !res.locals.mobileOriginAllowed)) {
+  const contentType = req.get('content-type')?.split(';')[0].trim().toLowerCase();
+  const imageUpload = req.method === 'POST' && req.path === '/archivos' && ['image/jpeg','image/png','image/webp'].includes(contentType || '');
+  if ((origin && origin !== allowed && !res.locals.mobileOriginAllowed) || req.get('X-Cafe-Request') !== '1' || (!imageUpload && contentType !== 'application/json') || (req.get('sec-fetch-site') === 'cross-site' && !res.locals.mobileOriginAllowed)) {
     res.status(403).json({ error: 'Solicitud no autorizada' }); return;
   }
   next();
 });
+app.use('/archivos', express.raw({ type: ['image/jpeg','image/png','image/webp'], limit: '4mb' }));
 app.use('/promociones', express.json({ limit: '64kb' }));
 app.use(express.json({ limit: '16kb' }));
 app.use('/auth', authRouter);
 
 app.use("/api/v1", mobileRouter);
 app.use("/api/v1/promociones", publicPromotionsRouter);
+app.use("/api/v1/archivos", publicMediaRouter);
+app.use("/archivos", requireSession, requireAdmin, mediaRouter);
 app.use("/promociones", requireSession, requireAdmin, promotionsRouter);
 app.use("/pedidos", requireSession, ordersRouter);
 app.use("/cafeteria", requireSession, cafeStatusRouter);

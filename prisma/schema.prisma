@@ -19,6 +19,14 @@ model promotion_settings {
  revision Int @default(0)
  updated_at DateTime @default(dbgenerated("clock_timestamp()")) @db.Timestamptz(6)
 }
+// Datos binarios y RLS: prisma/sql/010_media_files.sql.
+model media_files {
+ id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+ mime_type String
+ byte_size Int
+ data Bytes
+ created_at DateTime @default(dbgenerated("clock_timestamp()")) @db.Timestamptz(6)
+}
 model products {
  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
  name String

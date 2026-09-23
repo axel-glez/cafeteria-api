@@ -16,7 +16,7 @@
   let imageOrigins = new Set();
   function isAllowedImage(value) {
     if (typeof value !== 'string') return false;
-    if (/^assets\/[a-zA-Z0-9_.-]+$/.test(value)) return true;
+    if (/^assets\/[a-zA-Z0-9_.-]+$/.test(value) || /^\/api\/v1\/archivos\/[0-9a-f-]{36}$/i.test(value)) return true;
     try {
       const url = new URL(value);
       return url.protocol === 'https:' && !url.username && !url.password && imageOrigins.has(url.origin);

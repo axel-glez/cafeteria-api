@@ -15,6 +15,10 @@
     if (!App.auth.isAdmin()) return;
     editingId = product?.id || null;
     elements.productForm.reset();
+    elements.productForm.elements.image.value = product?.image || '';
+    document.getElementById('productImageStatus').textContent = product?.image
+      ? 'Se conservará la imagen actual si no eliges otra.'
+      : 'Selecciona una imagen JPG, PNG o WebP de hasta 4 MB.';
     document.getElementById('productFormError').textContent = '';
     document.getElementById('modalTitle').textContent = editingId ? 'Editar producto' : 'Nuevo producto';
     elements.productForm.querySelector('[type="submit"]').textContent = editingId ? 'Guardar cambios' : 'Guardar producto';
@@ -52,6 +56,12 @@
     buttons.forEach(button => { button.disabled = true; });
     try {
       const data = Object.fromEntries(new FormData(form));
+      const imageFile = form.elements.image_file.files[0];
+      delete data.image_file;
+      if (imageFile) {
+        errorMessage.textContent = 'Subiendo imagen…';
+        data.image = await App.uploadImage(imageFile);
+      }
       data.variants = document.getElementById('useVariants').checked
         ? [...document.querySelectorAll('#variantRows .variant-row')].map(row => ({
             ...(row.dataset.id ? { id: row.dataset.id } : {}),
@@ -64,7 +74,7 @@
       if (!data.variants.length) throw new Error('Agrega al menos un tamaño.');
       data.price = Math.min(...data.variants.map(variant => variant.price));
       data.image = String(data.image || '').trim();
-      if (!App.products.isAllowedImage(data.image)) throw new Error('Usa una imagen local de assets o una URL HTTPS de los dominios autorizados del catálogo.');
+      if (!data.image || !App.products.isAllowedImage(data.image)) throw new Error('Selecciona una imagen válida para el producto.');
       if (editingId) await App.products.updateProduct(editingId, data);
       else await App.products.addProduct(data);
       form.reset();
@@ -112,6 +122,10 @@
   function initialize() {
     document.getElementById('useVariants').addEventListener('change', updatePricingMode);
     document.getElementById('addVariant').addEventListener('click', () => addVariantRow());
+    document.getElementById('productImageFile').addEventListener('change', event => {
+      const file = event.target.files[0];
+      document.getElementById('productImageStatus').textContent = file ? `${file.name} · lista para subir al guardar` : 'No se seleccionó una imagen nueva.';
+    });
     elements.newProductButton.addEventListener('click', () => open());
     elements.closeModalButton.addEventListener('click', close);
     elements.cancelModalButton.addEventListener('click', close);

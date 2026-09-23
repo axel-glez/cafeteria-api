@@ -302,7 +302,7 @@
              ===================================================== -->
         <section class="content" id="view-promociones">
           <div class="page-title-row"><div><p class="eyebrow">En la app</p><h2>Promociones y novedades</h2><p class="muted">Anuncia ofertas, combos o novedades. Estos anuncios no modifican los precios ni aplican descuentos al pedido.</p></div></div>
-          <p class="muted">Usa textos y condiciones reales. La imagen puede quedar vacía para usar la foto de café. Para imágenes propias usa una ruta de assets o una URL HTTPS autorizada; no se suben archivos desde este editor.</p>
+          <p class="muted">Usa textos y condiciones reales. Puedes elegir una imagen JPG, PNG o WebP desde tu computadora; si la dejas vacía se usará la foto de café.</p>
           <details><summary>Dominios de imágenes autorizados</summary><p id="promotionOrigins" class="muted"></p></details>
           <p id="promotionsMessage" role="status" aria-live="polite"></p>
           <form id="promotionsForm">
@@ -452,7 +452,11 @@
             </div>
           </fieldset>
           <fieldset class="variant-editor"><legend>Opciones del producto</legend><div id="productModifiers"></div></fieldset>
-          <label>Imagen (ruta local o URL HTTPS autorizada)<input name="image" required placeholder="assets/galleta.jpg" /></label>
+          <label>Imagen del producto
+            <input id="productImageFile" name="image_file" type="file" accept="image/jpeg,image/png,image/webp" />
+            <input name="image" type="hidden" />
+            <small id="productImageStatus">Selecciona una imagen JPG, PNG o WebP de hasta 4 MB.</small>
+          </label>
           <p id="productFormError" role="alert"></p>
           <div class="modal-actions">
             <button type="button" class="ghost-button" id="cancelModal">

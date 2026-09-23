@@ -37,7 +37,9 @@ Usan el fondo genérico de café, no fotografías específicas de esos productos
 - `GET /promociones`: sesión administrativa; devuelve `items`, `revision`, `updated_at` e `image_origins`.
 - `PUT /promociones`: sesión administrativa, `Content-Type: application/json`, `X-Cafe-Request: 1`, cuerpo `{ "items": [...], "expected_revision": 0 }`. Devuelve el estado nuevo. Revisión antigua: HTTP 409. Datos inválidos: 400. Sin migración: 503.
 - Cada anuncio: `id` UUID, `label` (1–25 caracteres), `title` (1–70), `description` (1–180), `image` (hasta 1000, puede ser vacía), `active` booleano. IDs únicos; hasta 12 anuncios.
-- Imágenes: ruta `assets/nombre.jpg` (también PNG, JPEG y WebP) o URL HTTPS de un dominio de `public/assets/image-origins.json`. No se permiten credenciales en la URL. No hay subida de archivos. Se conserva la política CSP; agregar un dominio requiere revisar y actualizar la lista tanto en la fuente del panel como en `public/`.
+- Imágenes: el panel permite subir archivos JPG, PNG y WebP de hasta 4 MB mediante el servicio global `POST /archivos`. Los archivos se guardan en `media_files` y se sirven públicamente por `GET /api/v1/archivos/:id`. Las rutas antiguas de `assets/` y URLs HTTPS autorizadas siguen siendo compatibles con datos ya existentes.
+
+Antes de desplegar esta función ejecuta una vez `npm run media:migrate` con la misma `DATABASE_URL` del backend.
 
 Si no hay activos, la app oculta el carrusel. Si la consulta falla, usa una bienvenida genérica y descarta los anuncios anteriores; un error de promociones no bloquea compras. Una imagen fallida usa la foto de respaldo.
 

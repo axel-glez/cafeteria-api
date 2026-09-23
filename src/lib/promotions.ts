@@ -1,24 +1,16 @@
-import { readFileSync } from 'node:fs';
 import { z } from 'zod';
 import { accessDb } from './access';
 import { ApiError } from './catalog';
+import { allowedImageOrigins, validImage } from './media';
 
-export const promotionImageOrigins: string[] = JSON.parse(readFileSync(new URL('../../public/assets/image-origins.json', import.meta.url), 'utf8'));
-const origins = new Set(promotionImageOrigins);
-function validImage(value: string) {
-  if (!value || /^assets\/[a-zA-Z0-9_-]+\.(png|jpe?g|webp)$/.test(value)) return true;
-  try {
-    const url = new URL(value);
-    return url.protocol === 'https:' && !url.username && !url.password && origins.has(url.origin);
-  } catch { return false; }
-}
+export const promotionImageOrigins = allowedImageOrigins;
 const text = z.string().trim().min(1, 'Completa los textos del anuncio').refine(v => !v.includes('\u0000'), 'Texto no válido');
 export const promotionSchema = z.strictObject({
   id: z.uuid(),
   label: text.max(25),
   title: text.max(70),
   description: text.max(180),
-  image: z.string().trim().max(1000).refine(validImage, 'Usa una imagen local assets/archivo.jpg, una URL HTTPS de un dominio autorizado o deja la imagen vacía'),
+  image: z.string().trim().max(1000).refine(value => validImage(value, true), 'Selecciona un archivo de imagen válido o deja la imagen vacía'),
   active: z.boolean(),
 });
 export const promotionsSchema = z.array(promotionSchema).max(12).refine(items => new Set(items.map(p => p.id)).size === items.length, 'No repitas identificadores');

@@ -1,8 +1,9 @@
 (function initializePromotionsFeature(App) {
   let items = [], revision = null, busy = false, dirty = false, version = 0;
   let imageOrigins = [];
+  const pendingFiles = new Map();
   function previewSource(value) {
-    if (/^assets\/[a-zA-Z0-9_-]+\.(png|jpe?g|webp)$/.test(value)) return value;
+    if (/^assets\/[a-zA-Z0-9_-]+\.(png|jpe?g|webp)$/.test(value) || /^\/api\/v1\/archivos\/[0-9a-f-]{36}$/i.test(value)) return value;
     try {
       const url = new URL(value);
       if (url.protocol === 'https:' && !url.username && !url.password && imageOrigins.includes(url.origin)) return value;
@@ -46,7 +47,7 @@
       photo.loading = 'lazy';
       photo.referrerPolicy = 'no-referrer';
       const fallback = 'assets/promo-coffee-photo.png';
-      photo.src = previewSource(promotion.image);
+      photo.src = pendingFiles.has(promotion.id) ? URL.createObjectURL(pendingFiles.get(promotion.id)) : previewSource(promotion.image);
       photo.addEventListener('error', () => { if (photo.getAttribute('src') !== fallback) photo.src = fallback; });
       const copy = node('div', 'promotion-preview-copy');
       const badge = node('span', 'promotion-label', promotion.label || 'ETIQUETA');
@@ -59,24 +60,33 @@
       const targets = { label: badge, title, description };
       for (const [key, caption, max] of [
         ['label', 'Etiqueta', 25], ['title', 'Título', 70],
-        ['description', 'Descripción', 180], ['image', 'Imagen (opcional)', 1000],
+        ['description', 'Descripción', 180],
       ]) {
         const label = node('label', '', caption);
         const input = node(key === 'description' ? 'textarea' : 'input');
         input.name = `${promotion.id}-${key}`;
         input.maxLength = max;
-        input.required = key !== 'image';
+        input.required = true;
         input.value = promotion[key];
-        if (key === 'image') input.placeholder = 'assets/cappuccino.jpg o URL HTTPS autorizada';
         input.addEventListener('input', () => {
           promotion[key] = input.value;
           if (targets[key]) targets[key].textContent = input.value;
           changed();
         });
-        // Evitar una petición por cada tecla de la dirección de imagen.
-        if (key === 'image') input.addEventListener('change', () => { photo.src = previewSource(input.value.trim()); });
         label.append(input); fields.append(label);
       }
+      const imageLabel = node('label', '', 'Imagen del anuncio');
+      const imageInput = node('input');
+      imageInput.type = 'file'; imageInput.accept = 'image/jpeg,image/png,image/webp';
+      imageInput.addEventListener('change', () => {
+        const file = imageInput.files[0];
+        if (!file) { pendingFiles.delete(promotion.id); return; }
+        pendingFiles.set(promotion.id, file);
+        photo.src = URL.createObjectURL(file);
+        changed();
+      });
+      imageLabel.append(imageInput, node('small', '', promotion.image ? 'Elige otra imagen para reemplazar la actual.' : 'JPG, PNG o WebP, máximo 4 MB.'));
+      fields.append(imageLabel);
       const toggleLabel = node('label', 'promotion-toggle');
       const toggle = node('input'); toggle.type = 'checkbox'; toggle.checked = promotion.active;
       toggle.addEventListener('change', () => { promotion.active = toggle.checked; changed(); });
@@ -91,6 +101,7 @@
       }, `Bajar anuncio ${index + 1}`));
       actions.append(button('Quitar', () => {
         if (!window.confirm('¿Quitar este anuncio? El cambio se aplicará al publicar.')) return;
+        pendingFiles.delete(promotion.id);
         items.splice(index, 1); changed(); render();
       }, `Quitar anuncio ${index + 1}`));
       fields.append(actions); card.append(fields); list.append(card);
@@ -124,9 +135,13 @@
     const current = ++version;
     busy = true; controls(); message('Publicando…');
     try {
+      for (const promotion of items) {
+        const file = pendingFiles.get(promotion.id);
+        if (file) promotion.image = await App.uploadImage(file);
+      }
       const data = await App.api('/promociones', { method: 'PUT', body: JSON.stringify({ items, expected_revision: revision }) });
       if (current !== version || !App.auth.isAdmin()) return;
-      accept(data); message('Cambios publicados en el backend. La app actualizada los consulta al abrir el menú y cada 30 segundos mientras esté activo.');
+      pendingFiles.clear(); accept(data); message('Cambios publicados en el backend. La app actualizada los consulta al abrir el menú y cada 30 segundos mientras esté activo.');
     } catch (error) {
       if (current !== version) return;
       // Incluye conflictos y respuestas perdidas: verificar servidor antes de reintentar.
@@ -150,7 +165,7 @@
     window.addEventListener('beforeunload', event => { if (dirty) { event.preventDefault(); event.returnValue = ''; } });
   }
   function stop() {
-    version++; items = []; revision = null; busy = false; dirty = false; imageOrigins = [];
+    version++; items = []; revision = null; busy = false; dirty = false; imageOrigins = []; pendingFiles.clear();
     message(''); byId('promotionOrigins').textContent = ''; render();
   }
   App.promotions = { initialize, load, stop };

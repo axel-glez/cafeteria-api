@@ -17,6 +17,7 @@
     "cafe:migrate": "node scripts/migrate-cafe-status.mjs",
     "notes:migrate": "node scripts/migrate-order-notes.mjs",
     "promotions:migrate": "node scripts/migrate-promotions.mjs",
+    "media:migrate": "node scripts/migrate-media-files.mjs",
     "promotions:seed": "tsx scripts/seed-promotions.ts",
     "test:promotions": "tsx --test tests/promotions.local.test.ts tests/promotions-panel.test.mjs",
     "test:cafe": "tsx --test tests/cafe-status.local.test.ts",

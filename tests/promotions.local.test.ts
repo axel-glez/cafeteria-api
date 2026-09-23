@@ -19,6 +19,8 @@ test('Promociones: migración y rutas reales sobre PostgreSQL en memoria', { tim
   await db.exec('CREATE ROLE anon; CREATE ROLE authenticated; CREATE TABLE orders(id integer); INSERT INTO orders VALUES(1);');
   const migration = readFileSync(new URL('../prisma/sql/009_promotions.sql', import.meta.url), 'utf8');
   await db.exec(migration);
+  await db.exec('CREATE TABLE products(id uuid PRIMARY KEY, image text NOT NULL, archived boolean NOT NULL DEFAULT false);');
+  await db.exec(readFileSync(new URL('../prisma/sql/010_media_files.sql', import.meta.url), 'utf8'));
   const { accessDb, tokenHash } = await import('../src/lib/access');
   t.after(() => accessDb.end());
   const query = async (sql: string, values: unknown[] = []) => {
@@ -71,6 +73,19 @@ test('Promociones: migración y rutas reales sobre PostgreSQL en memoria', { tim
     revision = data.revision;
     assert.deepEqual((await json('GET', '/api/v1/promociones')).items.map((p: any) => p.title), ['Segundo', 'Editado']);
     assert.equal((await json('GET', '/promociones', undefined, 200, admin)).items.length, 3);
+  });
+  await t.test('sube una imagen global y la sirve a productos o promociones', async () => {
+    const png = Buffer.from([137,80,78,71,13,10,26,10,0,0,0,0]);
+    const uploaded = await fetch(base + '/archivos', { method: 'POST', headers: { ...admin, 'Content-Type': 'image/png' }, body: png });
+    const uploadData = await uploaded.json();
+    assert.equal(uploaded.status, 201, JSON.stringify(uploadData));
+    const { image } = uploadData;
+    assert.match(image, /^\/api\/v1\/archivos\/[0-9a-f-]{36}$/);
+    const served = await fetch(base + image);
+    assert.equal(served.status, 200);
+    assert.equal(served.headers.get('content-type'), 'image/png');
+    assert.deepEqual(Buffer.from(await served.arrayBuffer()), png);
+    assert.equal((await fetch(base + '/archivos', { method: 'POST', headers: { ...admin, 'Content-Type': 'image/png' }, body: Buffer.from('falso') })).status, 400);
   });
   await t.test('rechaza panel antiguo, campos inválidos e imágenes no autorizadas', async () => {
     const stale = await json('PUT', '/promociones', { items: [], expected_revision: 0 }, 409, admin);
