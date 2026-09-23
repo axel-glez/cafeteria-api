@@ -112,6 +112,18 @@ mobileRouter.get('/pedidos/:id',requireCustomer,async(req,res)=>{
  const id=uuid.parse(req.params.id);
  const order=await transaction(async c=>{if(!(await c.query('SELECT 1 FROM public.orders WHERE id=$1 AND session_hash=$2',[id,res.locals.customerHash])).rowCount)throw new ApiError(404,'Pedido no encontrado');return readOrder(c,id);});res.json(order);
 });
+mobileRouter.patch('/pedidos/:id/cancelacion',requireCustomer,async(req,res)=>{
+ const id=uuid.parse(req.params.id);z.strictObject({}).parse(req.body);
+ const order=await transaction(async c=>{
+  const current=(await c.query('SELECT status FROM public.orders WHERE id=$1 AND session_hash=$2 FOR UPDATE',[id,res.locals.customerHash])).rows[0];
+  if(!current)throw new ApiError(404,'Pedido no encontrado');
+  if(current.status!=='new')throw new ApiError(409,'El pedido ya comenzó a prepararse y no se puede cancelar desde la app','ORDER_ALREADY_PREPARING');
+  await c.query("UPDATE public.orders SET status='cancelled',updated_at=now() WHERE id=$1",[id]);
+  await c.query("INSERT INTO public.order_status_history(order_id,from_status,to_status) VALUES($1,'new','cancelled')",[id]);
+  return readOrder(c,id);
+ });
+ res.json(order);
+});
 ordersRouter.get('/',async(req,res)=>{
  const query=z.object({cursor:uuid.optional(),limit:z.coerce.number().int().min(1).max(100).default(100),status:statuses.optional(),scope:z.enum(['active']).optional()}).parse(req.query);
  const result=await transaction(async c=>{

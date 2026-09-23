@@ -34,6 +34,9 @@ test('Pedidos: opciones, importes, reintentos, permisos, historial y archivo',{t
   assert.equal((await request('POST','/api/v1/pedidos',{items:[{variant_id:v.id,quantity:1,option_ids:[foreign.options[0].id]}]},{...customer,'Idempotency-Key':randomUUID()})).status,400);
   const chocolate=group.options.find((o:any)=>o.name==='Chocolate').id;
   const mixed=await json('POST','/api/v1/pedidos',{items:[{variant_id:v.id,quantity:1,option_ids:draft.items[0].option_ids},{variant_id:p.variants[1].id,quantity:1,option_ids:[chocolate]}]},201,{...customer,'Idempotency-Key':randomUUID()});assert.equal(mixed.total,'89.50');assert.equal(mixed.items.length,2);
+  assert.equal((await request('PATCH','/api/v1/pedidos/'+mixed.id+'/cancelacion',{}, {...customer,Authorization:'Bearer '+p.otherToken})).status,404);
+  const cancelled=await json('PATCH','/api/v1/pedidos/'+mixed.id+'/cancelacion',{},200,customer);assert.equal(cancelled.status,'cancelled');
+  assert.equal((await request('PATCH','/api/v1/pedidos/'+mixed.id+'/cancelacion',{},customer)).status,409);
   const bulk=await json('POST','/api/v1/pedidos',{items:Array.from({length:3},()=>({variant_id:p.variants[1].id,quantity:1,option_ids:[chocolate]}))},201,{...customer,'Idempotency-Key':randomUUID()});assert.equal(bulk.total,'120.00');assert.equal(bulk.items.length,3);
   const limitsCustomer={...customer,Authorization:'Bearer '+p.otherToken,'Idempotency-Key':randomUUID()};
   assert.equal((await request('POST','/api/v1/pedidos',{items:[{variant_id:v.id,quantity:2,option_ids:[chocolate]},{variant_id:p.variants[1].id,quantity:2,option_ids:[chocolate]}]},limitsCustomer)).status,400);
@@ -56,6 +59,7 @@ test('Pedidos: opciones, importes, reintentos, permisos, historial y archivo',{t
   assert.equal((await request('POST','/api/v1/pedidos',draft,{...customer,'Idempotency-Key':randomUUID()})).status,409);
   assert.equal((await request('PATCH','/pedidos/'+a.id+'/estado',{from_status:'new',status:'delivered'})).status,409);
   await json('PATCH','/pedidos/'+a.id+'/estado',{from_status:'new',status:'preparing'});
+  assert.equal((await request('PATCH','/api/v1/pedidos/'+a.id+'/cancelacion',{},customer)).status,409);
   assert.equal((await request('PATCH','/pedidos/'+a.id+'/estado',{from_status:'new',status:'preparing'})).status,409);
   await json('PATCH','/pedidos/'+a.id+'/estado',{from_status:'preparing',status:'ready'});
   await json('PATCH','/pedidos/'+a.id+'/estado',{from_status:'ready',status:'delivered'});
