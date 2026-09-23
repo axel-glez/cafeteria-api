@@ -34,6 +34,23 @@
     transition: 0.25s;
   }
 
+  .sidebar-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 19;
+    border: 0;
+    display: block;
+    visibility: hidden;
+    opacity: 0;
+    background: rgba(32, 24, 17, 0.48);
+    transition: opacity 0.25s ease, visibility 0.25s ease;
+  }
+
+  .sidebar-backdrop.open {
+    visibility: visible;
+    opacity: 1;
+  }
+
   .sidebar.open {
     left: 0;
     box-shadow: 20px 0 60px rgba(0, 0, 0, 0.25);
@@ -129,6 +146,16 @@
 
   .menu-toolbar select {
     height: 44px;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .mobile-product-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    flex: 0 0 auto;
   }
 
   .form-row {
@@ -141,6 +168,50 @@
 
   .orders-table {
     min-width: 620px;
+  }
+}
+
+@media (max-width: 420px) {
+  .main {
+    padding-inline: 12px;
+  }
+
+  .product-grid,
+  .admin-product-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .product-image {
+    height: 180px;
+  }
+
+  .page-title-row {
+    flex-direction: column;
+  }
+
+  .mobile-product-action {
+    width: 100%;
+  }
+
+  .modal-backdrop {
+    padding: 10px;
+  }
+
+  .modal {
+    max-height: calc(100vh - 20px);
+    border-radius: 18px;
+    padding: 18px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
   }
 }
 

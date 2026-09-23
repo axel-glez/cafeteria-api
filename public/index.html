@@ -59,7 +59,7 @@
       </div>
     </section>
     <div class="app-shell" id="appShell" hidden>
-      <aside class="sidebar" id="sidebar">
+      <aside class="sidebar" id="sidebar" aria-label="Menú principal">
         <div class="brand">
           <img class="brand-logo" src="assets/busters-logo.png" alt="Logo de Buster’s" width="64" height="64" />
           <div>
@@ -108,6 +108,7 @@
           </div>
         </div>
       </aside>
+      <button class="sidebar-backdrop" id="sidebarBackdrop" type="button" aria-label="Cerrar menú" tabindex="-1"></button>
 
       <main class="main">
         <section class="panel cafe-control" aria-label="Recepción de pedidos">
@@ -127,6 +128,8 @@
               class="icon-button menu-toggle"
               id="menuToggle"
               aria-label="Abrir menú"
+              aria-controls="sidebar"
+              aria-expanded="false"
             >
               ☰
             </button>
@@ -271,6 +274,9 @@
                 Consulta precios, disponibilidad y categoría de cada producto.
               </p>
             </div>
+            <button class="primary-button mobile-product-action" id="newProductMobileBtn" type="button">
+              + Nuevo producto
+            </button>
           </div>
 
           <div class="menu-toolbar">

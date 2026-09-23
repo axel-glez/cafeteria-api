@@ -21,6 +21,10 @@
   display: none;
 }
 
+.mobile-product-action {
+  display: none;
+}
+
 .notification-dot {
   position: absolute;
   top: 8px;
@@ -70,6 +74,14 @@
 
 .mini-btn:hover {
   background: #f6f3ee;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid rgba(146, 93, 32, 0.32);
+  outline-offset: 2px;
 }
 
 /* ---------- Campos y búsqueda ---------- */
@@ -167,6 +179,7 @@
   border: 1px solid var(--line);
   border-radius: 18px;
   background: #fff;
+  min-width: 0;
 }
 
 .product-image {
@@ -202,6 +215,7 @@
 .product-body h3 {
   margin: 0 0 5px;
   font-size: 13px;
+  overflow-wrap: anywhere;
 }
 
 .product-meta {
@@ -322,7 +336,7 @@
   gap: 10px;
 }
 
-button:disabled { opacity: 0.6; cursor: wait; }
+button:disabled { opacity: 0.6; cursor: not-allowed; }
 #productFormError { color: #b42318; }
 
 .card-actions { display: flex; flex-wrap: wrap; gap: 8px; }

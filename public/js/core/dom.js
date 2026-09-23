@@ -6,6 +6,7 @@
 (function initializeDomReferences(App) {
   App.elements = {
     sidebar: document.getElementById('sidebar'),
+    sidebarBackdrop: document.getElementById('sidebarBackdrop'),
     menuToggle: document.getElementById('menuToggle'),
 
     productGrid: document.getElementById('productGrid'),
@@ -19,6 +20,7 @@
     productModal: document.getElementById('productModal'),
     productForm: document.getElementById('productForm'),
     newProductButton: document.getElementById('newProductBtn'),
+    newProductMobileButton: document.getElementById('newProductMobileBtn'),
     closeModalButton: document.getElementById('closeModal'),
     cancelModalButton: document.getElementById('cancelModal'),
   };

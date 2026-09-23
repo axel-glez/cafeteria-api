@@ -13,6 +13,10 @@
     byId('loginView').hidden = false;
     App.elements.productModal.classList.remove('open');
     App.elements.productModal.setAttribute('aria-hidden', 'true');
+    App.elements.sidebar.classList.remove('open');
+    App.elements.sidebarBackdrop.classList.remove('open');
+    App.elements.menuToggle.setAttribute('aria-expanded', 'false');
+    document.body.classList.remove('modal-open', 'sidebar-open');
     App.elements.productForm.reset();
     byId('accountForm').reset();
     byId('accountList').replaceChildren();
@@ -27,6 +31,7 @@
     byId('sessionAlias').textContent = account.username;
     byId('sessionRole').textContent = isAdmin() ? 'Administrador' : 'Empleado';
     App.elements.newProductButton.hidden = !isAdmin();
+    App.elements.newProductMobileButton.hidden = !isAdmin();
     document.querySelectorAll('[data-view], [data-go]').forEach(button => {
       button.hidden = !isAdmin() && !['pedidos', 'menu'].includes(button.dataset.view || button.dataset.go);
     });

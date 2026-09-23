@@ -36,6 +36,15 @@
   background: var(--ink);
 }
 
+.sidebar-backdrop {
+  display: none;
+}
+
+body.sidebar-open,
+body.modal-open {
+  overflow: hidden;
+}
+
 .brand {
   display: flex;
   align-items: center;

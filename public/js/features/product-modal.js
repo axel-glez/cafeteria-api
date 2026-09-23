@@ -7,9 +7,11 @@
   const elements = App.elements;
 
   let editingId = null;
+  let returnFocus = null;
 
   async function open(product = null) {
     if (saving || !App.auth.isAdmin()) return;
+    returnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     try { await App.modifiers.load(); }
     catch (error) { document.getElementById('catalogStatus').textContent = error.message; return; }
     if (!App.auth.isAdmin()) return;
@@ -35,6 +37,7 @@
     updatePricingMode();
     elements.productModal.classList.add('open');
     elements.productModal.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('modal-open');
     elements.productForm.elements.name.focus();
   }
 
@@ -42,6 +45,9 @@
     if (saving || !App.auth.isAdmin()) return;
     elements.productModal.classList.remove('open');
     elements.productModal.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('modal-open');
+    returnFocus?.focus();
+    returnFocus = null;
   }
 
   let saving = false;
@@ -127,12 +133,28 @@
       document.getElementById('productImageStatus').textContent = file ? `${file.name} · lista para subir al guardar` : 'No se seleccionó una imagen nueva.';
     });
     elements.newProductButton.addEventListener('click', () => open());
+    elements.newProductMobileButton.addEventListener('click', () => open());
     elements.closeModalButton.addEventListener('click', close);
     elements.cancelModalButton.addEventListener('click', close);
     elements.productForm.addEventListener('submit', handleSubmit);
 
     elements.productModal.addEventListener('click', (event) => {
       if (event.target === elements.productModal) close();
+    });
+    document.addEventListener('keydown', event => {
+      if (!elements.productModal.classList.contains('open')) return;
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        close();
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      const focusable = [...elements.productModal.querySelectorAll('button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])')]
+        .filter(element => !element.hidden && element.getClientRects().length);
+      if (!focusable.length) return;
+      const first = focusable[0], last = focusable.at(-1);
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
     });
   }
 
