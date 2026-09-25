@@ -88,7 +88,15 @@ npm run dev
 
 El primer comando solicita un alias ficticio de 3 a 32 caracteres (`a-z`, números, guion o guion bajo), una contraseña de 15 a 128 caracteres y su confirmación. La contraseña no se muestra al escribir. No hay una cuenta predeterminada. Si ya existe un administrador, crea las cuentas adicionales desde el panel.
 
-Deja el servidor abierto y visita el [panel local](http://localhost:5000). Inicia sesión y crea categorías y productos con sus presentaciones y precios. El catálogo inicial está vacío. Detén el servidor con **Ctrl+C**.
+Deja el servidor abierto y visita el [panel local](http://localhost:5000). El catálogo inicial está vacío. Para publicar el primer producto:
+
+1. Inicia sesión con la cuenta administradora.
+2. Pulsa **Nuevo producto**.
+3. En **Categoría**, escribe un nombre como `Bebidas calientes` y pulsa **Crear categoría**. La categoría nueva queda seleccionada automáticamente.
+4. Completa el nombre, precio, descripción e imagen. Si el producto tiene tamaños, activa **Este producto tiene tamaños o presentaciones** y captura sus precios.
+5. Pulsa **Guardar producto** y comprueba que aparezca en el menú.
+
+Solo los administradores pueden crear categorías y productos. Los empleados pueden consultar el menú y cambiar la disponibilidad. Detén el servidor con **Ctrl+C** cuando termines.
 
 Comprueba también:
 
@@ -140,6 +148,7 @@ npm run start:render
 | Tabla inexistente | Completa la preparación SQL; generar Prisma no crea tablas. |
 | `Could not open file prisma/sql/...` o `No such file or directory` | Se abrió SQL Shell desde otra carpeta. Sal con `\q` y ejecuta `psql ... -f scripts/setup-local.sql` desde `cafeadmin\api`, como indica el paso 4. |
 | `La base ya contiene tablas` | El instalador se detuvo para no sobrescribir datos. Si el proyecto ya funcionaba, no repitas el paso 4. Si fue un intento fallido, revisa la base antes de eliminarla o restaurarla. |
+| **Nuevo producto** no responde o conserva el cursor de bloqueo | Espera a que aparezca `Catálogo conectado` y confirma que la sesión diga **Administrador**. Si Render acaba de desplegar una versión, actualiza con **Ctrl+F5** para descartar el JavaScript anterior. Una base sin categorías ya no bloquea el botón: la primera categoría se crea dentro del formulario. |
 | Cliente Prisma ausente | Repite `npx prisma generate --schema prisma/schema.prisma`. |
 | Error al leer `image-origins.json` | Define `FRONTEND_DIR=public` y comprueba `public/assets/image-origins.json`. |
 | Puerto ocupado | Detén el otro servidor o cambia `PORT` y `APP_ORIGIN`. |
@@ -161,14 +170,14 @@ npm run start:render
 
 ## Verificación de estas instrucciones
 
-Revisión del 24 de septiembre de 2026 con Node.js 24.13.0, npm 11.6.2 y PostgreSQL 18.6:
+Revisión del 25 de septiembre de 2026 con Node.js 24.13.0, npm 11.6.2 y PostgreSQL 18.6:
 
 - Instalación con `npm ci`, generación de Prisma y compilación correctas.
 - Preparación SQL ejecutada desde cero con `psql` en una instancia PostgreSQL temporal local.
 - Administrador creado mediante `npm run account:create`; inicio de sesión y consulta de la cuenta comprobados por HTTP.
 - Arranque compilado con `npm start`: panel, recursos, `/health` y catálogo responden HTTP 200.
 - Arranque de desarrollo con `npm run dev`: salud y catálogo responden HTTP 200.
-- 29 pruebas aisladas y seis pruebas de integración aprobadas.
+- 30 pruebas aisladas y seis pruebas de integración aprobadas. La prueba del panel cubre una base sin categorías, la habilitación de **Nuevo producto** y la creación de la primera categoría.
 - Enlaces internos existentes y enlaces externos de instalación accesibles.
 
-Para evitar interferencias con servicios existentes, la revisión usó puertos temporales. No se modificó la base de datos compartida. El flujo visual del panel y las notificaciones en un dispositivo móvil no forman parte de esta comprobación automatizada.
+Para evitar interferencias con servicios existentes, la revisión usó puertos temporales. No se modificó la base de datos compartida. El recurso actualizado del formulario también se comprobó después del despliegue en Render. Las notificaciones en un dispositivo móvil no forman parte de esta comprobación automatizada.
