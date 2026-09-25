@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { accessDb } from '../lib/access';
-import { ApiError } from '../lib/catalog';
-import { promotionsSchema, promotionImageOrigins, readPromotions } from '../lib/promotions';
+import { accessDb } from '../lib/access.js';
+import { ApiError } from '../lib/catalog.js';
+import { promotionsSchema, promotionImageOrigins, readPromotions } from '../lib/promotions.js';
 
 export const promotionsRouter = Router();
 export const publicPromotionsRouter = Router();

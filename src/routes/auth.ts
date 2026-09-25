@@ -1,7 +1,7 @@
 import { Router, type Request, type RequestHandler, type Response } from "express";
 import { randomBytes } from "node:crypto";
 import { z } from "zod";
-import { accessDb, tokenHash, verifyPassword, createAccount, usernameSchema } from "../lib/access";
+import { accessDb, tokenHash, verifyPassword, createAccount, usernameSchema } from "../lib/access.js";
 
 export const authRouter = Router();
 const cookieName = process.env.NODE_ENV === 'production' ? '__Host-cafe_session' : 'cafe_session';

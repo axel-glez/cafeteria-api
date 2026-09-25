@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { accessDb } from './access';
-import { ApiError } from './catalog';
-import { allowedImageOrigins, validImage } from './media';
+import { accessDb } from './access.js';
+import { ApiError } from './catalog.js';
+import { allowedImageOrigins, validImage } from './media.js';
 
 export const promotionImageOrigins = allowedImageOrigins;
 const text = z.string().trim().min(1, 'Completa los textos del anuncio').refine(v => !v.includes('\u0000'), 'Texto no válido');

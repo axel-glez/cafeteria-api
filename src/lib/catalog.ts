@@ -1,4 +1,4 @@
-import { Prisma } from '../generated/prisma/client';
+import { Prisma } from '../generated/prisma/client.js';
 export const catalogInclude = {
  category_details: true,
  variants: { where: { archived: false }, orderBy: { position: 'asc' as const }, include: { presentation: true } },

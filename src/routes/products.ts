@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { prisma } from '../lib/prisma';
-import { catalogInclude, serializeProduct, ApiError } from '../lib/catalog';
-import { emitCatalogUpdated } from '../lib/socket';
+import { prisma } from '../lib/prisma.js';
+import { catalogInclude, serializeProduct, ApiError } from '../lib/catalog.js';
+import { emitCatalogUpdated } from '../lib/socket.js';
 const uuid=z.uuid();
 const text=z.string().trim().min(1,'Este campo no puede estar vacío');
 export const priceSchema=z.number().min(0).max(99999999.99).refine(v=>/^\d+(\.\d{1,2})?$/.test(String(v)),'El precio debe tener como máximo dos decimales');

@@ -1,9 +1,9 @@
 import { randomUUID } from 'node:crypto';
 import { Router } from 'express';
 import { z } from 'zod';
-import { accessDb } from '../lib/access';
-import { ApiError } from '../lib/catalog';
-import { mediaPath } from '../lib/media';
+import { accessDb } from '../lib/access.js';
+import { ApiError } from '../lib/catalog.js';
+import { mediaPath } from '../lib/media.js';
 
 export const mediaRouter = Router();
 export const publicMediaRouter = Router();

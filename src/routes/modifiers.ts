@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { prisma } from '../lib/prisma';
-import { priceSchema } from './products';
-import { ApiError } from '../lib/catalog';
-import { requireAdmin } from './auth';
+import { prisma } from '../lib/prisma.js';
+import { priceSchema } from './products.js';
+import { ApiError } from '../lib/catalog.js';
+import { requireAdmin } from './auth.js';
 export const modifiersRouter=Router();
 const option=z.strictObject({id:z.uuid().optional(),name:z.string().trim().min(1).max(80),price:priceSchema,available:z.boolean().default(true)});
 const body=z.strictObject({name:z.string().trim().min(1).max(80),min_selections:z.number().int().min(0).max(12),max_selections:z.number().int().min(1).max(12),options:z.array(option).min(1).max(30)})

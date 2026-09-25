@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { z } from "zod";
-import { prisma } from "../lib/prisma";
-import { catalogInclude, serializeProduct } from "../lib/catalog";
+import { prisma } from "../lib/prisma.js";
+import { catalogInclude, serializeProduct } from "../lib/catalog.js";
 
 const categoryId = z.uuid({ error: "El ID debe ser un UUID válido" });
 const categoryBody = z.strictObject({

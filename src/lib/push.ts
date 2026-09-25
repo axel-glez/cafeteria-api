@@ -1,5 +1,5 @@
-import { accessDb } from './access';
-import { orderPushMessage } from './push-message';
+import { accessDb } from './access.js';
+import { orderPushMessage } from './push-message.js';
 
 // A durable outbox is written in the same transaction as each status change.
 // A lease prevents multiple server instances from sending the same job concurrently.

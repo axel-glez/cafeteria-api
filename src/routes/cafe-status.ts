@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { accessDb } from '../lib/access';
-import { ApiError } from '../lib/catalog';
-import { readCafeStatus } from '../lib/cafe-status';
-import { requireAdmin } from './auth';
+import { accessDb } from '../lib/access.js';
+import { ApiError } from '../lib/catalog.js';
+import { readCafeStatus } from '../lib/cafe-status.js';
+import { requireAdmin } from './auth.js';
 
 export const cafeStatusRouter = Router();
 cafeStatusRouter.get('/', async (_req, res) => { res.json(await readCafeStatus()); });

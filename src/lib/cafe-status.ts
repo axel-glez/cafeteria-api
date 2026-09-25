@@ -1,6 +1,6 @@
 import type { Pool, PoolClient } from 'pg';
-import { accessDb } from './access';
-import { ApiError } from './catalog';
+import { accessDb } from './access.js';
+import { ApiError } from './catalog.js';
 
 export const cafeClosedMessage = 'La cafetería está cerrada y no está recibiendo pedidos. Puedes seguir consultando el menú y preparando tu carrito.';
 
