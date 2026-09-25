@@ -386,14 +386,17 @@
               <input name="price" required type="number" min="0" max="99999999.99" step="0.01" placeholder="70" />
             </label>
 
-            <label>
-              Categoría
-              <select name="category">
-                <option value="platillo">Platillo</option>
-                <option value="bebida">Bebida</option>
-                <option value="snack">Snack</option>
-              </select>
-            </label>
+            <div class="category-picker">
+              <label>
+                Categoría
+                <select name="category" required></select>
+              </label>
+              <div class="category-create-row">
+                <input id="newCategoryName" type="text" maxlength="80" placeholder="Ej. Bebidas calientes" aria-label="Nombre de la nueva categoría" />
+                <button id="createCategoryBtn" class="mini-btn" type="button">+ Crear categoría</button>
+              </div>
+              <small id="categoryFormStatus" role="status" aria-live="polite"></small>
+            </div>
           </div>
 
           <label>

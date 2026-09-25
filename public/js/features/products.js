@@ -15,6 +15,19 @@
 
   const fallbackImage = 'assets/product-placeholder.svg';
   let imageOrigins = new Set();
+  let catalogCategories = [];
+
+  function renderCategories(selectedName = '') {
+    const menuSelection = elements.menuFilter.value;
+    const productSelection = selectedName || elements.productForm.elements.category.value;
+    const options = catalogCategories.map(category => `<option value="${escape(category.name)}">${escape(category.name)}</option>`).join('');
+    elements.menuFilter.innerHTML = '<option value="todos">Todas las categorías</option>' + options;
+    elements.menuFilter.value = catalogCategories.some(category => category.name === menuSelection) ? menuSelection : 'todos';
+    elements.productForm.elements.category.innerHTML = options;
+    if (catalogCategories.some(category => category.name === productSelection)) elements.productForm.elements.category.value = productSelection;
+    document.getElementById('categoryTabs').innerHTML = '<button class="tab active" data-category="todos">Todos</button>' + catalogCategories.map(category => `<button class="tab" data-category="${escape(category.name)}">${escape(category.name)}</button>`).join('');
+    initializeCategoryTabs();
+  }
   function isAllowedImage(value) {
     if (typeof value !== 'string') return false;
     if (/^assets\/[a-zA-Z0-9_.-]+$/.test(value) || /^\/api\/v1\/archivos\/[0-9a-f-]{36}$/i.test(value)) return true;
@@ -42,14 +55,12 @@
       products.splice(0, products.length, ...items.map(normalize));
       for (const key of Object.keys(categoryLabels)) delete categoryLabels[key];
       categories.forEach(category => { categoryLabels[category.name] = category.name; });
-      const options = categories.map(category => `<option value="${escape(category.name)}">${escape(category.name)}</option>`).join('');
-      elements.menuFilter.innerHTML = '<option value="todos">Todas las categorías</option>' + options;
-      elements.productForm.elements.category.innerHTML = options;
-      document.getElementById('categoryTabs').innerHTML = '<button class="tab active" data-category="todos">Todos</button>' + categories.map(category => `<button class="tab" data-category="${escape(category.name)}">${escape(category.name)}</button>`).join('');
-      initializeCategoryTabs();
+      catalogCategories = categories;
+      renderCategories();
       refreshProductViews();
-      status.textContent = categories.length ? 'Catálogo conectado.' : 'Crea una categoría en la API antes de agregar productos.';
-      elements.newProductButton.disabled = !categories.length || !App.auth.isAdmin();
+      status.textContent = categories.length ? 'Catálogo conectado.' : 'Aún no hay categorías. Pulsa Nuevo producto para crear la primera.';
+      elements.newProductButton.disabled = !App.auth.isAdmin();
+      elements.newProductMobileButton.disabled = !App.auth.isAdmin();
     } catch (error) {
       status.textContent = error.message;
       retry.hidden = false;
@@ -172,6 +183,17 @@
     refreshProductViews();
   }
 
+  async function createCategory(name) {
+    const category = await App.api('/categorias', {
+      method: 'POST', body: JSON.stringify({ name }),
+    });
+    catalogCategories = [...catalogCategories, category].sort((a, b) => a.name.localeCompare(b.name, 'es'));
+    categoryLabels[category.name] = category.name;
+    renderCategories(category.name);
+    status.textContent = `Categoría “${category.name}” creada.`;
+    return category;
+  }
+
   async function updateProduct(productId, { name, price, category, description, image, variants, modifier_group_ids }) {
     const updated = await App.api('/productos/' + encodeURIComponent(productId), {
       method: 'PATCH', body: JSON.stringify({ name, price: Number(price), category, description, image, variants, modifier_group_ids }),
@@ -276,6 +298,7 @@
     isAllowedImage,
     loadCatalog,
     addProduct,
+    createCategory,
     updateProduct,
     refreshProductViews,
     renderProducts,

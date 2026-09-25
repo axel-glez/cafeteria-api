@@ -162,6 +162,8 @@
   .promotion-preview { min-height:160px; }
   .promotion-fields input, .promotion-fields textarea, .modal input, .modal select, .modal textarea, .search-box input, .login-field input { font-size:16px; }
   .form-row { grid-template-columns:minmax(0,1fr); }
+  .category-create-row { grid-template-columns:minmax(0,1fr); }
+  .category-create-row .mini-btn { width:100%; }
   .variant-row { grid-template-columns:repeat(2,minmax(0,1fr)); }
   .modifier-option-row { grid-template-columns:minmax(0,1fr); }
   .modal-backdrop { padding:10px; }

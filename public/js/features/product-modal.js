@@ -22,6 +22,10 @@
       ? 'Se conservará la imagen actual si no eliges otra.'
       : 'Selecciona una imagen JPG, PNG o WebP de hasta 4 MB.';
     document.getElementById('productFormError').textContent = '';
+    document.getElementById('newCategoryName').value = '';
+    document.getElementById('categoryFormStatus').textContent = elements.productForm.elements.category.options.length
+      ? 'Selecciona una categoría existente o crea otra.'
+      : 'No hay categorías todavía. Escribe un nombre y crea la primera.';
     document.getElementById('modalTitle').textContent = editingId ? 'Editar producto' : 'Nuevo producto';
     elements.productForm.querySelector('[type="submit"]').textContent = editingId ? 'Guardar cambios' : 'Guardar producto';
     if (editingId) {
@@ -125,9 +129,40 @@
     document.querySelectorAll('#variantRows input').forEach(input => { input.disabled = !enabled; });
   }
 
+  async function createCategory() {
+    if (saving || !App.auth.isAdmin()) return;
+    const input = document.getElementById('newCategoryName');
+    const button = document.getElementById('createCategoryBtn');
+    const categoryStatus = document.getElementById('categoryFormStatus');
+    const name = input.value.trim();
+    if (!name) {
+      categoryStatus.textContent = 'Escribe el nombre de la categoría.';
+      input.focus();
+      return;
+    }
+    button.disabled = true;
+    categoryStatus.textContent = 'Creando categoría…';
+    try {
+      const category = await App.products.createCategory(name);
+      elements.productForm.elements.category.value = category.name;
+      input.value = '';
+      categoryStatus.textContent = `Categoría “${category.name}” creada y seleccionada.`;
+    } catch (error) {
+      categoryStatus.textContent = error.message;
+    } finally {
+      button.disabled = false;
+    }
+  }
+
   function initialize() {
     document.getElementById('useVariants').addEventListener('change', updatePricingMode);
     document.getElementById('addVariant').addEventListener('click', () => addVariantRow());
+    document.getElementById('createCategoryBtn').addEventListener('click', createCategory);
+    document.getElementById('newCategoryName').addEventListener('keydown', event => {
+      if (event.key !== 'Enter') return;
+      event.preventDefault();
+      void createCategory();
+    });
     document.getElementById('productImageFile').addEventListener('change', event => {
       const file = event.target.files[0];
       document.getElementById('productImageStatus').textContent = file ? `${file.name} · lista para subir al guardar` : 'No se seleccionó una imagen nueva.';

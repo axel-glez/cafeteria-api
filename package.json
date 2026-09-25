@@ -12,7 +12,7 @@
     "start": "node dist/server.js",
     "start:render": "tsx src/server.ts",
     "test": "npm run test:unit",
-    "test:unit": "tsx --test tests/socket.test.ts tests/push.test.ts tests/order-notes-panel.test.mjs tests/promotions-panel.test.mjs tests/cafe-status.local.test.ts tests/promotions.local.test.ts",
+    "test:unit": "tsx --test tests/socket.test.ts tests/push.test.ts tests/order-notes-panel.test.mjs tests/promotions-panel.test.mjs tests/products-panel.test.mjs tests/cafe-status.local.test.ts tests/promotions.local.test.ts",
     "test:integration": "tsx --test --test-concurrency=1 tests/*.integration.test.ts",
     "postinstall": "prisma skills sync || exit 0",
     "access:migrate": "node scripts/migrate-access.mjs",
